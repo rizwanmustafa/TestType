@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Test Type Prototype {% endblock %}
+{% block content %}
+<div id="typingPlace">
+    <div id="innerTypingPlace">
+        <div id="typeText">{{ words }}</div>
+        <input type="text" id="typeSpace" autofocus>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}" defer></script>
+<script src="{{ url_for('static', filename='utility.js') }}" defer></script>
+{% endblock %}
