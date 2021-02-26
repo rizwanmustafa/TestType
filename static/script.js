@@ -1,3 +1,4 @@
+// Later use AJAX to get words
 class Utility {
     constructor(typeText) {
         this.longLength = 0;

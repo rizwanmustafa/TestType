@@ -8,6 +8,5 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='script.js') }}" defer></script>
-<script src="{{ url_for('static', filename='utility.js') }}" defer></script>
+<script src="{{ url_for('static', filename='script.js') }}?q={{ scriptTime }}" defer></script>
 {% endblock %}
