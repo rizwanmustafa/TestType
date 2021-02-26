@@ -18,15 +18,31 @@ class Utility {
 
 		// Get all word tags
 		this.wordTags = typeText.querySelectorAll("word")
-		console.log(this.wordTags)
 
 		// Get all span tags
 		this.spanTags = Array<NodeListOf<HTMLSpanElement>>(this.longLength);
 		for (let i = 0; i < this.wordTags.length; i++)
 			this.spanTags[i] = this.wordTags[i].querySelectorAll("span");
-		console.log(this.spanTags)
 
 
+	}
+
+	// Get Words Later for more sessions without reloading webpage
+	private GetWordsFromServer() {
+		fetch("/GetWords").then(response => {
+			if (response.status == 200)
+				return response.json();
+			else
+				alert("Could not connect to server!");
+		}).then(wordsJSON => {
+			var finalString = "";
+			wordsJSON.forEach(word => {
+				finalString += word + " ";
+			});
+			finalString = finalString.substr(0, finalString.length - 1);
+			console.log(finalString)
+			document.querySelector("#typeText").innerHTML = finalString;
+		})
 	}
 
 	private GetWordsHTML(): string {
@@ -106,7 +122,6 @@ const myUtility = new Utility(typeText);
 
 let wordIndex: number = 0
 myUtility.FormatWordTag(wordIndex)
-console.log("we formatted the word")
 
 // Add event when user types
 document.querySelector("#typeSpace").addEventListener("input", OnInput)
@@ -187,7 +202,6 @@ function OnInput(e: Event) {
 	}
 	else target.value = ""
 }
-
 
 /* To Do: To store the starting time of a character:
  * get the position of cursor and store the starting time.

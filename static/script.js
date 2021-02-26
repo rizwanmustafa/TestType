@@ -1,4 +1,3 @@
-// Later use AJAX to get words
 class Utility {
     constructor(typeText) {
         this.longLength = 0;
@@ -11,12 +10,27 @@ class Utility {
         typeText.innerHTML = this.GetWordsHTML();
         // Get all word tags
         this.wordTags = typeText.querySelectorAll("word");
-        console.log(this.wordTags);
         // Get all span tags
         this.spanTags = Array(this.longLength);
         for (let i = 0; i < this.wordTags.length; i++)
             this.spanTags[i] = this.wordTags[i].querySelectorAll("span");
-        console.log(this.spanTags);
+    }
+    // Get Words Later for more sessions without reloading webpage
+    GetWordsFromServer() {
+        fetch("/GetWords").then(response => {
+            if (response.status == 200)
+                return response.json();
+            else
+                alert("Could not connect to server!");
+        }).then(wordsJSON => {
+            var finalString = "";
+            wordsJSON.forEach(word => {
+                finalString += word + " ";
+            });
+            finalString = finalString.substr(0, finalString.length - 1);
+            console.log(finalString);
+            document.querySelector("#typeText").innerHTML = finalString;
+        });
     }
     GetWordsHTML() {
         let finalHTML = "";
@@ -79,7 +93,6 @@ const typeText = document.querySelector("#typeText");
 const myUtility = new Utility(typeText);
 let wordIndex = 0;
 myUtility.FormatWordTag(wordIndex);
-console.log("we formatted the word");
 // Add event when user types
 document.querySelector("#typeSpace").addEventListener("input", OnInput);
 // Handle user input
@@ -151,10 +164,23 @@ function OnInput(e) {
     else
         target.value = "";
 }
+function GetWordsFromServer() {
+    fetch("/GetWords").then(response => {
+        return response.json();
+    }).then(wordsJSON => {
+        var finalString = "";
+        wordsJSON.forEach(word => {
+            finalString += word + " ";
+        });
+        finalString = finalString.substr(0, finalString.length - 1);
+        console.log(finalString);
+        document.querySelector("#typeText").innerHTML = finalString;
+    });
+}
 /* To Do: To store the starting time of a character:
  * get the position of cursor and store the starting time.
  * To process the time difference:
  * Take next next time and find the time that is larger than that
  * and get the difference. We will get time taken for the key
- * corresponding to the starting time index */
+ * corresponding to the starting time index */ 
 //# sourceMappingURL=script.js.map
