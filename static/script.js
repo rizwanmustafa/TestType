@@ -90,58 +90,91 @@ class Utility {
     }
 }
 const typeText = document.querySelector("#typeText");
+const typeSpace = document.querySelector("#typeSpace");
 const myUtility = new Utility(typeText);
+//Store time taken for each character
+var timeTaken = new Array(myUtility.words.length);
+InitializeTimePressedArray();
+var lastInput = "";
 let wordIndex = 0;
 myUtility.FormatWordTag(wordIndex);
 // Add event when user types
 document.querySelector("#typeSpace").addEventListener("input", OnInput);
 // Handle user input
 function OnInput(e) {
+    console.log(typeSpace.selectionStart);
+    const currentTime = Date.now();
     const target = e.target;
-    var targetValue = target.value;
+    var currentInput = target.value;
+    if (currentInput == lastInput)
+        return;
     if (wordIndex >= myUtility.words.length) {
         target.value = "";
         return;
     }
-    if (targetValue != " ") {
-        if (targetValue.includes(" ")) {
+    //Get current cursor place
+    const charIndex = target.selectionStart - 1;
+    console.log("Word Index: " + wordIndex + " Character Index: " + charIndex);
+    //Store time for current char
+    // Get place where the input changed and shift the values accordingly
+    if (typeSpace.selectionStart != currentInput.length) {
+        // Check if the user has removed the character or added one
+        if (currentInput.length < lastInput.length) {
+            ShiftValuesToLeft(charIndex);
+        }
+        else if (currentInput.length > lastInput.length) {
+            ShiftValuesToRight(charIndex);
+        }
+    }
+    if (charIndex != -1 && lastInput.length < currentInput.length) {
+        // A char was added so set the timeTaken
+        timeTaken[wordIndex][charIndex] = currentTime;
+    }
+    //Remove time for any char that has not yet been typed
+    for (let i = currentInput.length; i < myUtility.words[wordIndex].length; i++) {
+        timeTaken[wordIndex][i] = undefined;
+    }
+    lastInput = currentInput;
+    if (currentInput != " ") {
+        if (currentInput[currentInput.length - 1] == " ") {
             if (wordIndex >= myUtility.words.length - 1 || myUtility.NewLineStarting(wordIndex)) {
                 myUtility.HideWordTags(wordIndex);
                 target.value = "";
             }
-            targetValue = targetValue.trim();
+            currentInput = currentInput.trim();
             myUtility.UnformatWordTag(wordIndex);
             // Validate this word and move on to the next one
-            if (targetValue == myUtility.words[wordIndex]) {
+            if (currentInput == myUtility.words[wordIndex]) {
                 myUtility.wordTags[wordIndex].classList.add("correct");
             }
             else {
                 // Check where the user made mistakes and add them to span elements
                 for (let i = 0; i < myUtility.words[wordIndex].length; i++) {
                     const char = myUtility.words[wordIndex][i];
-                    if (char != targetValue[i]) {
+                    if (char != currentInput[i]) {
                         myUtility.wordTags[wordIndex].classList.add("wrong");
                         myUtility.spanTags[wordIndex][i].classList.add("wrong");
                     }
                 }
-                if (targetValue.length > myUtility.words[wordIndex].length)
+                if (currentInput.length > myUtility.words[wordIndex].length)
                     myUtility.wordTags[wordIndex].classList.add('wrong');
             }
             // Increment word index, get span tags for new word, format it and reset textbox value
             wordIndex++;
+            lastInput = "";
             myUtility.FormatWordTag(wordIndex);
             target.value = "";
         }
         else {
-            targetValue = targetValue.trim();
+            currentInput = currentInput.trim();
             // Remove current class from all span tags and add it to the current one
             myUtility.UnformatSpanTags(wordIndex);
-            if (targetValue.length < myUtility.words[wordIndex].length)
-                myUtility.spanTags[wordIndex][targetValue.length].classList.add("current");
+            if (currentInput.length < myUtility.words[wordIndex].length)
+                myUtility.spanTags[wordIndex][currentInput.length].classList.add("current");
             // Validate the existing word
             let wordWrong = false;
-            for (let i = 0; i < targetValue.length; i++) {
-                const char = targetValue[i];
+            for (let i = 0; i < currentInput.length; i++) {
+                const char = currentInput[i];
                 if (i >= myUtility.words[wordIndex].length) {
                     myUtility.wordTags[wordIndex].classList.add("wrong");
                     wordWrong = true;
@@ -164,23 +197,36 @@ function OnInput(e) {
     else
         target.value = "";
 }
-function GetWordsFromServer() {
-    fetch("/GetWords").then(response => {
-        return response.json();
-    }).then(wordsJSON => {
-        var finalString = "";
-        wordsJSON.forEach(word => {
-            finalString += word + " ";
-        });
-        finalString = finalString.substr(0, finalString.length - 1);
-        console.log(finalString);
-        document.querySelector("#typeText").innerHTML = finalString;
-    });
+function InitializeTimePressedArray() {
+    for (let i = 0; i < myUtility.words.length; i++) {
+        timeTaken[i] = new Array(myUtility.words[i].length);
+    }
 }
-/* To Do: To store the starting time of a character:
- * get the position of cursor and store the starting time.
- * To process the time difference:
- * Take next next time and find the time that is larger than that
- * and get the difference. We will get time taken for the key
- * corresponding to the starting time index */ 
+// Use when the user adds a character in between the word
+function ShiftValuesToRight(index) {
+    for (let i = myUtility.words[wordIndex].length - 1; i > index; i--)
+        timeTaken[wordIndex][i] = timeTaken[wordIndex][i - 1];
+}
+// Use when the user removes a character in between the word
+function ShiftValuesToLeft(index) {
+    for (let i = index + 2; i < timeTaken[wordIndex].length; i++) {
+        timeTaken[wordIndex][i - 1] = timeTaken[wordIndex][i];
+    }
+}
+// Returns the index where the last input differs from the current input
+function GetDifferentCharIndex(lastInput, currentInput) {
+    var maxLength = Math.max(lastInput.length, currentInput.length);
+    // Check where the new input has changed
+    for (let i = 0; i < maxLength; i++) {
+        if (lastInput[i] == undefined || currentInput[i] == undefined)
+            return i;
+        if (lastInput[i] != currentInput[i])
+            return i;
+    }
+}
+/*
+   To Do:
+   Format code
+   Divide code into smaller chunks
+*/ 
 //# sourceMappingURL=script.js.map
