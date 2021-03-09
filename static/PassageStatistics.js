@@ -1,10 +1,10 @@
 export class PassageStatistics {
-    constructor(wordTags) {
+    constructor(wordTags, spanTags) {
+        this.SetVariables(wordTags, spanTags);
+    }
+    SetVariables(wordTags, spanTags) {
         this.wordTags = wordTags;
-        // Get and set the span tags
-        this.spanTags = Array(this.wordTags.length);
-        for (let i = 0; i < this.wordTags.length; i++)
-            this.spanTags[i] = this.wordTags[i].querySelectorAll("span");
+        this.spanTags = spanTags;
     }
     GetNumberOfCorrectWords() {
         var correctWords = 0;

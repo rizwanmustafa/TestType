@@ -9,8 +9,8 @@ app.SECRET_KEY = "AODJF;LKASJDFASLKDJFKL;AJSDLKF;JA;SD"
 @app.route("/")
 def index():
     styleTime = int(os.path.getmtime("static/styles.css"))
-    scriptTime = int(os.path.getmtime("static/script.js"))
-    return render_template("index.html", words=GetRandomWords(50), styleTime=styleTime, scriptTime=scriptTime)
+    scriptTime = int(os.path.getmtime("static/MainScript.js"))
+    return render_template("index.html", styleTime=styleTime, scriptTime=scriptTime)
 
 # Later check if the user is logged in. If yes, then send personalized words
 @app.route("/GetWords")

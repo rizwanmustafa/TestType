@@ -1,47 +1,52 @@
-import {PassageHandler} from './PassageHandler.js'
+import { PassageHandler } from './PassageHandler.js'
+import { PassageStatistics } from './PassageStatistics.js';
 
-const typeText = document.querySelector("#typeText") as HTMLElement;
 const typeSpace = document.querySelector("#typeSpace") as HTMLInputElement;
-const myUtility = new PassageHandler();
+const passageHandler = new PassageHandler();
 
 // Get words from server
-myUtility.GetWordsFromServer(function(){
+passageHandler.GetWordsFromServer(function () {
 
-		
+
 	//Store time taken for each character
-	var timePressed: Array<Array<number>> = new Array<Array<number>>(myUtility.wordArray.length);
+	var timePressed: Array<Array<number>> = new Array<Array<number>>(passageHandler.wordArray.length);
 	InitializeTimePressedArray();
 	var lastInput = "";
-	
+
 	let wordIndex: number = 0
-	myUtility.MarkWordTagAsCurrent(wordIndex)
-	
+	passageHandler.MarkWordTagAsCurrent(wordIndex)
+
 	// Add event when user types
 	document.querySelector("#typeSpace").addEventListener("input", OnInput)
-	
+
 	// Handle user input
 	function OnInput(e: Event) {
 		const currentTime = Date.now();
 		const target = e.target as HTMLInputElement;
 		var userInput = target.value;
-		
+
 		// Do not do anything if the user has already finished their exercise
-		if (wordIndex >= myUtility.wordArray.length) {
+		if (wordIndex >= passageHandler.wordArray.length) {
+			// Get Results and log them in the console for now
+			var passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags);
+			var totalTime: number = GetTotalTime();
+			var correctWords = passageStats.GetNumberOfCorrectWords();
+			console.log("WPM: " + Math.floor(correctWords / (totalTime / 60000)))
 			target.value = "";
 			return;
 		}
-		
+
 		if (userInput == lastInput) return;
 		else if (userInput == "") {
-			myUtility.UnformatWordTag(wordIndex);
-			myUtility.MarkWordTagAsCurrent(wordIndex);
+			passageHandler.UnformatWordTag(wordIndex);
+			passageHandler.MarkWordTagAsCurrent(wordIndex);
 			return;
 		}
-		
+
 		//Get current cursor place
 		const charIndex = target.selectionStart - 1;
 		//Store time for current char
-		
+
 		// Get place where the input changed and shift the values accordingly
 		if (typeSpace.selectionStart != userInput.length) {
 			// Check if the user has removed the character or added one
@@ -52,212 +57,167 @@ myUtility.GetWordsFromServer(function(){
 				ShiftValuesToRight(charIndex);
 			}
 		}
-		
+
 		// A char was added so set the time it was pressed
-		if (charIndex < myUtility.wordArray[wordIndex].length && lastInput.length < userInput.length) {
+		if (charIndex < passageHandler.wordArray[wordIndex].length && lastInput.length < userInput.length) {
 			timePressed[wordIndex][charIndex] = currentTime;
 		}
-		
+
 		// Remove time for any character that has not yet been typed
-		for (let i = userInput.length; i < myUtility.wordArray[wordIndex].length; i++) {
+		for (let i = userInput.length; i < passageHandler.wordArray[wordIndex].length; i++) {
 			timePressed[wordIndex][i] = undefined;
 		}
-		
+
 		lastInput = userInput;
-		
+
 		if (userInput[userInput.length - 1] == " ") {
-			
-			if (wordIndex >= myUtility.wordArray.length - 1 || myUtility.GetIndexOfNewLine(wordIndex)) {
-				myUtility.HideWordTagsUntilIndex(wordIndex)
+
+			if (wordIndex >= passageHandler.wordArray.length - 1 || passageHandler.GetIndexOfNewLine(wordIndex)) {
+				passageHandler.HideWordTagsUntilIndex(wordIndex)
 				target.value = "";
 			}
 			userInput = userInput.trim()
-			myUtility.UnformatWordTag(wordIndex)
+			passageHandler.UnformatWordTag(wordIndex)
 			// Validate this word and move on to the next one
-			if (userInput == myUtility.wordArray[wordIndex]) {
-				myUtility.wordTags[wordIndex].classList.add("correct")
+			if (userInput == passageHandler.wordArray[wordIndex]) {
+				passageHandler.wordTags[wordIndex].classList.add("correct")
 			}
 			else {
-				ValidateAndFormatWord(userInput, true);
+				passageHandler.ValidateAndFormatWord(wordIndex, userInput, true);
 			}
-			
+
 			MoveToNextWord();
 		}
 		else {
 			userInput = userInput.trim()
 			// Remove any classes from all span tags
-			myUtility.UnformatSpanTags(wordIndex)
-			
+			passageHandler.UnformatSpanTags(wordIndex)
+
 			// Add "current" class to the current span tag
-			if (userInput.length < myUtility.wordArray[wordIndex].length) {
-				myUtility.spanTags[wordIndex][userInput.length].classList.add("current");
+			if (userInput.length < passageHandler.wordArray[wordIndex].length) {
+				passageHandler.spanTags[wordIndex][userInput.length].classList.add("current");
 			}
-			
-			ValidateAndFormatWord(userInput);
+
+			passageHandler.ValidateAndFormatWord(wordIndex, userInput, false);
 		}
 	}
-	
+
 	function InitializeTimePressedArray() {
-		for (let i = 0; i < myUtility.wordArray.length; i++) {
-			timePressed[i] = new Array<number>(myUtility.wordArray[i].length);
+		for (let i = 0; i < passageHandler.wordArray.length; i++) {
+			timePressed[i] = new Array<number>(passageHandler.wordArray[i].length);
 		}
 	}
-	
+
 	// Use when the user adds a character in between the word
 	function ShiftValuesToRight(index: number) {
-		for (let i = myUtility.wordArray[wordIndex].length - 1; i > index; i--)
-		timePressed[wordIndex][i] = timePressed[wordIndex][i - 1];
+		for (let i = passageHandler.wordArray[wordIndex].length - 1; i > index; i--)
+			timePressed[wordIndex][i] = timePressed[wordIndex][i - 1];
 	}
-	
+
 	// Use when the user removes a character in between the word
 	function ShiftValuesToLeft(index: number) {
 		for (let i = index + 2; i < timePressed[wordIndex].length; i++) {
 			timePressed[wordIndex][i - 1] = timePressed[wordIndex][i];
 		}
 	}
-	
-	// Returns the index where the last input differs from the current input
-	function GetDifferentCharIndex(lastInput: String, currentInput: String) {
-		var maxLength = Math.max(lastInput.length, currentInput.length);
-		// Check where the new input has changed
-		for (let i = 0; i < maxLength; i++) {
-			if (lastInput[i] == undefined || currentInput[i] == undefined) return i;
-			
-			if (lastInput[i] != currentInput[i]) return i;
-		}
-	}
-	
+
 	function MoveToNextWord() {
 		wordIndex++;
+		if (wordIndex >= passageHandler.wordTags.length) return;
 		lastInput = "";
-		myUtility.MarkWordTagAsCurrent(wordIndex)
+		passageHandler.MarkWordTagAsCurrent(wordIndex)
 		typeSpace.value = "";
 	}
-	
-	function ValidateAndFormatWord(userInput: String, wordCompleted: Boolean = false) {
-		const word = myUtility.wordArray[wordIndex];
-		const wordTag = myUtility.wordTags[wordIndex];
-		
-		wordTag.classList.remove("wrong");
-		
-		if (userInput.length > word.length || (userInput != word && wordCompleted)) {
-			wordTag.classList.add("wrong");
-		}
-		else if (userInput.length < word.length && wordCompleted) {
-			// Add wrong class to span tags that have not been typed if user moved to next word
-			for (let i = userInput.length; i < word.length; i++) {
-				myUtility.spanTags[wordIndex][i].classList.add("wrong");
-			}
-		}
-		
-		for (let i = 0; i < userInput.length; i++) {
-			const char = userInput[i];
-			const spanTag = myUtility.spanTags[wordIndex][i];
-			
-			// If the user's input's length is greater than the word length
-			// Mark the word as wrong
-			if (i >= word.length) {
-				wordTag.classList.add("wrong");
-				break;
-			}
-			
-			// If the current character does not match the corresponding character
-			// Mark the character and the word wrong
-			if (char != word[i]) {
-				wordTag.classList.add("wrong");
-				spanTag.classList.add("wrong");
-			}
-			else {
-				spanTag.classList.remove("wrong");
-			}
-		}
-	}
-	
+
 	function GetTimeTakenArray() {
-		var timeTaken = new Array<Array<number>>(myUtility.wordArray.length);
-		for (let i = 0; i < myUtility.wordArray.length; i++) {
-			timeTaken[i] = new Array<number>(myUtility.wordArray[i].length);
+		var timeTaken = new Array<Array<number>>(passageHandler.wordArray.length);
+		for (let i = 0; i < passageHandler.wordArray.length; i++) {
+			timeTaken[i] = new Array<number>(passageHandler.wordArray[i].length);
 		}
-		
+
 		var lastIndex: number = GetSmallestValue(timePressed[0], null);
 		for (let i = 0; i < timeTaken.length; i++) {
-			
+
 			// Create an array to store the seen indexes
 			var seenIndexes: Array<number> = new Array<number>(timeTaken[i].length);
 			var smallestValueIndex = GetSmallestValue(timePressed[i], seenIndexes);
 			timeTaken[i][GetSmallestValue(timePressed[i], null)] = timePressed[i][smallestValueIndex] - timePressed[i == 0 ? 0 : i - 1][lastIndex];
 			lastIndex = smallestValueIndex;
 			seenIndexes.push(smallestValueIndex);
-			
+
 			while (GetSmallestValue(timePressed[i], seenIndexes) != -1) {
 				smallestValueIndex = GetSmallestValue(timePressed[i], seenIndexes);
 				// Set the time taken
 				timeTaken[i][smallestValueIndex] = timePressed[i][smallestValueIndex] - timePressed[i][lastIndex];
-				
+
 				lastIndex = smallestValueIndex;
 				seenIndexes.push(smallestValueIndex);
 			}
-			console.log("we reached here!")
 		}
-		
+
 		return timeTaken;
 	}
-	
+
 	function GetSmallestValue(searchArray: Array<number>, seenArray: Array<number>): number {
 		var smallestValueIndex: number = -1;
-		
-		if(searchArray == null || searchArray == undefined) return smallestValueIndex;
-		
+
+		if (searchArray == null || searchArray == undefined) return smallestValueIndex;
+
 		// Loop through each of the elements and find the smallest value
 		for (let i = 0; i < searchArray.length; i++) {
 			// If the index is seen, move on
 			if (seenArray != undefined && seenArray != null && seenArray.includes(i)) continue;
 			// If the value is undefined or null, move on
-			if(searchArray[i] == null || searchArray[i] == undefined) continue;
-			
+			if (searchArray[i] == null || searchArray[i] == undefined) continue;
+
 			// If the current number is smaller than our stored number, replace the numbers
 			if (smallestValueIndex == -1 || searchArray[i] < searchArray[smallestValueIndex]) {
-				console.log(searchArray[i]);
-				console.log(searchArray[smallestValueIndex]);
-				console.log("\n");
 				smallestValueIndex = i;
 			}
 		}
-		
+
 		return smallestValueIndex;
 	}
-	
-	function GetTotalTime() {
+
+	function GetTotalTime(): number {
 		var timeTaken = GetTimeTakenArray();
 		var wordsCompleted = GetNumberOfWordsCompleted();
 		var totalTime = 0;
-		
+
 		for (let i = 0; i < wordsCompleted; i++) {
 			const word = timeTaken[i];
 			if (word == null || word == undefined) continue;
-			
+
 			for (let a = 0; a < word.length; a++) {
 				if (word[a] != null || word[a] != undefined) totalTime += word[a];
 			}
-			
+
 		}
-		
-		console.log(totalTime);
+		return totalTime;
 	}
-	
+
 	function GetNumberOfWordsCompleted() {
 		var wordsCompleted = 0
-		
+
 		// Loop through each of the word
-		for (let i = 0; i < myUtility.wordTags.length; i++) {
-			if (myUtility.wordTags[i].classList.contains("current")) break;
-			
+		for (let i = 0; i < passageHandler.wordTags.length; i++) {
+			if (passageHandler.wordTags[i].classList.contains("current")) break;
+
 			wordsCompleted++;
 		}
-		
+
 		return wordsCompleted;
 	}
-	
+
+	function UpdateWords(){
+		passageHandler.GetWordsFromServer(null);
+		wordIndex = 0;
+		lastInput = "";
+		InitializeTimePressedArray();
+	}
+
+	setTimeout(UpdateWords, 10000);
+
 	/*
 	To Do:
 	Check for exceptions in the GetTimeTakenArray function and make the function more readable

@@ -3,7 +3,6 @@ export class PassageHandler {
     wordArray: Array<String>;
     wordTags: NodeListOf<HTMLElement>;
     spanTags: Array<NodeListOf<HTMLSpanElement>>;
-    longLength: number = 0;
 
     // Get Words Later for more sessions without reloading webpage
     public GetWordsFromServer(successiveFunction) {
@@ -16,7 +15,6 @@ export class PassageHandler {
             var finalHTML = "";
             // Set the word array and get the long length of it
             this.wordArray = wordsJSON as Array<string>;
-            this.GetLongLength();
 
             // Calculate the final HTML and set it
             wordsJSON.forEach(word => {
@@ -34,27 +32,56 @@ export class PassageHandler {
 
             // Get word and span tags
             this.wordTags = typeText.querySelectorAll("word");
-            this.spanTags = Array<NodeListOf<HTMLSpanElement>>(this.longLength);
+            this.spanTags = Array<NodeListOf<HTMLSpanElement>>(this.wordTags.length);
             for (let i = 0; i < this.wordTags.length; i++)
                 this.spanTags[i] = this.wordTags[i].querySelectorAll("span");
             this.MarkWordTagAsCurrent(0);
-
-            successiveFunction();
+            if(successiveFunction != undefined || successiveFunction != null) successiveFunction();
         })
     }
 
-    private GetLongLength(): number {
-        if (this.wordArray == null || this.wordArray == undefined)
-            return;
+    public ValidateAndFormatWord(wordIndex: number, userInput: String, wordCompleted: Boolean = false) {
+        if(wordIndex >= this.wordTags.length) return;
+        const word = this.wordArray[wordIndex];
+        const wordTag = this.wordTags[wordIndex];
 
-        this.longLength = 0;
+        wordTag.classList.remove("wrong");
 
-        // Get total length of a passage where every word is followed by a space
-        for (let i = 0; i < this.wordArray.length; i++)
-            this.longLength += this.wordArray[i].length + 1;
+        if (userInput.length > word.length || (userInput != word && wordCompleted)) {
+            wordTag.classList.add("wrong");
+        }
+        else if (userInput.length < word.length && wordCompleted) {
+            // Add wrong class to span tags that have not been typed if user moved to next word
+            for (let i = userInput.length; i < word.length; i++) {
+                this.spanTags[wordIndex][i].classList.add("wrong");
+            }
+        }
+
+        for (let i = 0; i < userInput.length; i++) {
+            const char = userInput[i];
+            const spanTag = this.spanTags[wordIndex][i];
+
+            // If the user's input's length is greater than the word length
+            // Mark the word as wrong
+            if (i >= word.length) {
+                wordTag.classList.add("wrong");
+                break;
+            }
+
+            // If the current character does not match the corresponding character
+            // Mark the character and the word wrong
+            if (char != word[i]) {
+                wordTag.classList.add("wrong");
+                spanTag.classList.add("wrong");
+            }
+            else {
+                spanTag.classList.remove("wrong");
+            }
+        }
     }
 
     public MarkWordTagAsCurrent(wordIndex: number) {
+
         const tag = this.wordTags[wordIndex];
         // Add current class to the tag and the first span of the tag
         tag.classList.add("current")

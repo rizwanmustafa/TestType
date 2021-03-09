@@ -1,15 +1,15 @@
 import { PassageHandler } from './PassageHandler.js';
-const typeText = document.querySelector("#typeText");
+import { PassageStatistics } from './PassageStatistics.js';
 const typeSpace = document.querySelector("#typeSpace");
-const myUtility = new PassageHandler();
+const passageHandler = new PassageHandler();
 // Get words from server
-myUtility.GetWordsFromServer(function () {
+passageHandler.GetWordsFromServer(function () {
     //Store time taken for each character
-    var timePressed = new Array(myUtility.wordArray.length);
+    var timePressed = new Array(passageHandler.wordArray.length);
     InitializeTimePressedArray();
     var lastInput = "";
     let wordIndex = 0;
-    myUtility.MarkWordTagAsCurrent(wordIndex);
+    passageHandler.MarkWordTagAsCurrent(wordIndex);
     // Add event when user types
     document.querySelector("#typeSpace").addEventListener("input", OnInput);
     // Handle user input
@@ -18,15 +18,20 @@ myUtility.GetWordsFromServer(function () {
         const target = e.target;
         var userInput = target.value;
         // Do not do anything if the user has already finished their exercise
-        if (wordIndex >= myUtility.wordArray.length) {
+        if (wordIndex >= passageHandler.wordArray.length) {
+            // Get Results and log them in the console for now
+            var passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags);
+            var totalTime = GetTotalTime();
+            var correctWords = passageStats.GetNumberOfCorrectWords();
+            console.log("WPM: " + Math.floor(correctWords / (totalTime / 60000)));
             target.value = "";
             return;
         }
         if (userInput == lastInput)
             return;
         else if (userInput == "") {
-            myUtility.UnformatWordTag(wordIndex);
-            myUtility.MarkWordTagAsCurrent(wordIndex);
+            passageHandler.UnformatWordTag(wordIndex);
+            passageHandler.MarkWordTagAsCurrent(wordIndex);
             return;
         }
         //Get current cursor place
@@ -43,49 +48,49 @@ myUtility.GetWordsFromServer(function () {
             }
         }
         // A char was added so set the time it was pressed
-        if (charIndex < myUtility.wordArray[wordIndex].length && lastInput.length < userInput.length) {
+        if (charIndex < passageHandler.wordArray[wordIndex].length && lastInput.length < userInput.length) {
             timePressed[wordIndex][charIndex] = currentTime;
         }
         // Remove time for any character that has not yet been typed
-        for (let i = userInput.length; i < myUtility.wordArray[wordIndex].length; i++) {
+        for (let i = userInput.length; i < passageHandler.wordArray[wordIndex].length; i++) {
             timePressed[wordIndex][i] = undefined;
         }
         lastInput = userInput;
         if (userInput[userInput.length - 1] == " ") {
-            if (wordIndex >= myUtility.wordArray.length - 1 || myUtility.GetIndexOfNewLine(wordIndex)) {
-                myUtility.HideWordTagsUntilIndex(wordIndex);
+            if (wordIndex >= passageHandler.wordArray.length - 1 || passageHandler.GetIndexOfNewLine(wordIndex)) {
+                passageHandler.HideWordTagsUntilIndex(wordIndex);
                 target.value = "";
             }
             userInput = userInput.trim();
-            myUtility.UnformatWordTag(wordIndex);
+            passageHandler.UnformatWordTag(wordIndex);
             // Validate this word and move on to the next one
-            if (userInput == myUtility.wordArray[wordIndex]) {
-                myUtility.wordTags[wordIndex].classList.add("correct");
+            if (userInput == passageHandler.wordArray[wordIndex]) {
+                passageHandler.wordTags[wordIndex].classList.add("correct");
             }
             else {
-                ValidateAndFormatWord(userInput, true);
+                passageHandler.ValidateAndFormatWord(wordIndex, userInput, true);
             }
             MoveToNextWord();
         }
         else {
             userInput = userInput.trim();
             // Remove any classes from all span tags
-            myUtility.UnformatSpanTags(wordIndex);
+            passageHandler.UnformatSpanTags(wordIndex);
             // Add "current" class to the current span tag
-            if (userInput.length < myUtility.wordArray[wordIndex].length) {
-                myUtility.spanTags[wordIndex][userInput.length].classList.add("current");
+            if (userInput.length < passageHandler.wordArray[wordIndex].length) {
+                passageHandler.spanTags[wordIndex][userInput.length].classList.add("current");
             }
-            ValidateAndFormatWord(userInput);
+            passageHandler.ValidateAndFormatWord(wordIndex, userInput, false);
         }
     }
     function InitializeTimePressedArray() {
-        for (let i = 0; i < myUtility.wordArray.length; i++) {
-            timePressed[i] = new Array(myUtility.wordArray[i].length);
+        for (let i = 0; i < passageHandler.wordArray.length; i++) {
+            timePressed[i] = new Array(passageHandler.wordArray[i].length);
         }
     }
     // Use when the user adds a character in between the word
     function ShiftValuesToRight(index) {
-        for (let i = myUtility.wordArray[wordIndex].length - 1; i > index; i--)
+        for (let i = passageHandler.wordArray[wordIndex].length - 1; i > index; i--)
             timePressed[wordIndex][i] = timePressed[wordIndex][i - 1];
     }
     // Use when the user removes a character in between the word
@@ -94,60 +99,18 @@ myUtility.GetWordsFromServer(function () {
             timePressed[wordIndex][i - 1] = timePressed[wordIndex][i];
         }
     }
-    // Returns the index where the last input differs from the current input
-    function GetDifferentCharIndex(lastInput, currentInput) {
-        var maxLength = Math.max(lastInput.length, currentInput.length);
-        // Check where the new input has changed
-        for (let i = 0; i < maxLength; i++) {
-            if (lastInput[i] == undefined || currentInput[i] == undefined)
-                return i;
-            if (lastInput[i] != currentInput[i])
-                return i;
-        }
-    }
     function MoveToNextWord() {
         wordIndex++;
+        if (wordIndex >= passageHandler.wordTags.length)
+            return;
         lastInput = "";
-        myUtility.MarkWordTagAsCurrent(wordIndex);
+        passageHandler.MarkWordTagAsCurrent(wordIndex);
         typeSpace.value = "";
     }
-    function ValidateAndFormatWord(userInput, wordCompleted = false) {
-        const word = myUtility.wordArray[wordIndex];
-        const wordTag = myUtility.wordTags[wordIndex];
-        wordTag.classList.remove("wrong");
-        if (userInput.length > word.length || (userInput != word && wordCompleted)) {
-            wordTag.classList.add("wrong");
-        }
-        else if (userInput.length < word.length && wordCompleted) {
-            // Add wrong class to span tags that have not been typed if user moved to next word
-            for (let i = userInput.length; i < word.length; i++) {
-                myUtility.spanTags[wordIndex][i].classList.add("wrong");
-            }
-        }
-        for (let i = 0; i < userInput.length; i++) {
-            const char = userInput[i];
-            const spanTag = myUtility.spanTags[wordIndex][i];
-            // If the user's input's length is greater than the word length
-            // Mark the word as wrong
-            if (i >= word.length) {
-                wordTag.classList.add("wrong");
-                break;
-            }
-            // If the current character does not match the corresponding character
-            // Mark the character and the word wrong
-            if (char != word[i]) {
-                wordTag.classList.add("wrong");
-                spanTag.classList.add("wrong");
-            }
-            else {
-                spanTag.classList.remove("wrong");
-            }
-        }
-    }
     function GetTimeTakenArray() {
-        var timeTaken = new Array(myUtility.wordArray.length);
-        for (let i = 0; i < myUtility.wordArray.length; i++) {
-            timeTaken[i] = new Array(myUtility.wordArray[i].length);
+        var timeTaken = new Array(passageHandler.wordArray.length);
+        for (let i = 0; i < passageHandler.wordArray.length; i++) {
+            timeTaken[i] = new Array(passageHandler.wordArray[i].length);
         }
         var lastIndex = GetSmallestValue(timePressed[0], null);
         for (let i = 0; i < timeTaken.length; i++) {
@@ -164,7 +127,6 @@ myUtility.GetWordsFromServer(function () {
                 lastIndex = smallestValueIndex;
                 seenIndexes.push(smallestValueIndex);
             }
-            console.log("we reached here!");
         }
         return timeTaken;
     }
@@ -182,9 +144,6 @@ myUtility.GetWordsFromServer(function () {
                 continue;
             // If the current number is smaller than our stored number, replace the numbers
             if (smallestValueIndex == -1 || searchArray[i] < searchArray[smallestValueIndex]) {
-                console.log(searchArray[i]);
-                console.log(searchArray[smallestValueIndex]);
-                console.log("\n");
                 smallestValueIndex = i;
             }
         }
@@ -203,18 +162,25 @@ myUtility.GetWordsFromServer(function () {
                     totalTime += word[a];
             }
         }
-        console.log(totalTime);
+        return totalTime;
     }
     function GetNumberOfWordsCompleted() {
         var wordsCompleted = 0;
         // Loop through each of the word
-        for (let i = 0; i < myUtility.wordTags.length; i++) {
-            if (myUtility.wordTags[i].classList.contains("current"))
+        for (let i = 0; i < passageHandler.wordTags.length; i++) {
+            if (passageHandler.wordTags[i].classList.contains("current"))
                 break;
             wordsCompleted++;
         }
         return wordsCompleted;
     }
+    function UpdateWords() {
+        passageHandler.GetWordsFromServer(null);
+        wordIndex = 0;
+        lastInput = "";
+        InitializeTimePressedArray();
+    }
+    setTimeout(UpdateWords, 10000);
     /*
     To Do:
     Check for exceptions in the GetTimeTakenArray function and make the function more readable
