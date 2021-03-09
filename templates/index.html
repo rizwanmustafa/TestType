@@ -8,5 +8,6 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='script.js') }}?q={{ scriptTime }}" defer></script>
+<script type="module" src="{{ url_for('static', filename='PassageHandler.js') }}?q={{ scriptTime }}" defer></script>
+<script type="module" src="{{ url_for('static', filename='MainScript.js') }}?q={{ scriptTime }}" defer></script>
 {% endblock %}
