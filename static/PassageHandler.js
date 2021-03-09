@@ -30,7 +30,7 @@ export class PassageHandler {
                 successiveFunction();
         });
     }
-    ValidateAndFormatWord(wordIndex, userInput, wordCompleted = false) {
+    ValidateAndFormatWord(wordIndex, userInput, wordCompleted) {
         if (wordIndex >= this.wordTags.length)
             return;
         const word = this.wordArray[wordIndex];
@@ -39,7 +39,7 @@ export class PassageHandler {
         if (userInput.length > word.length || (userInput != word && wordCompleted)) {
             wordTag.classList.add("wrong");
         }
-        else if (userInput.length < word.length && wordCompleted) {
+        if (userInput.length < word.length && wordCompleted == true) {
             // Add wrong class to span tags that have not been typed if user moved to next word
             for (let i = userInput.length; i < word.length; i++) {
                 this.spanTags[wordIndex][i].classList.add("wrong");

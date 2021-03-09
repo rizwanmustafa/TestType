@@ -28,10 +28,8 @@ passageHandler.GetWordsFromServer(function () {
 		// Do not do anything if the user has already finished their exercise
 		if (wordIndex >= passageHandler.wordArray.length) {
 			// Get Results and log them in the console for now
-			var passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags);
-			var totalTime: number = GetTotalTime();
-			var correctWords = passageStats.GetNumberOfCorrectWords();
-			console.log("WPM: " + Math.floor(correctWords / (totalTime / 60000)))
+			var passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, timePressed);
+			console.log("WPM: " + passageStats.GetWordSpeed(true));
 			target.value = "";
 			return;
 		}
@@ -129,97 +127,11 @@ passageHandler.GetWordsFromServer(function () {
 		typeSpace.value = "";
 	}
 
-	function GetTimeTakenArray() {
-		var timeTaken = new Array<Array<number>>(passageHandler.wordArray.length);
-		for (let i = 0; i < passageHandler.wordArray.length; i++) {
-			timeTaken[i] = new Array<number>(passageHandler.wordArray[i].length);
-		}
-
-		var lastIndex: number = GetSmallestValue(timePressed[0], null);
-		for (let i = 0; i < timeTaken.length; i++) {
-
-			// Create an array to store the seen indexes
-			var seenIndexes: Array<number> = new Array<number>(timeTaken[i].length);
-			var smallestValueIndex = GetSmallestValue(timePressed[i], seenIndexes);
-			timeTaken[i][GetSmallestValue(timePressed[i], null)] = timePressed[i][smallestValueIndex] - timePressed[i == 0 ? 0 : i - 1][lastIndex];
-			lastIndex = smallestValueIndex;
-			seenIndexes.push(smallestValueIndex);
-
-			while (GetSmallestValue(timePressed[i], seenIndexes) != -1) {
-				smallestValueIndex = GetSmallestValue(timePressed[i], seenIndexes);
-				// Set the time taken
-				timeTaken[i][smallestValueIndex] = timePressed[i][smallestValueIndex] - timePressed[i][lastIndex];
-
-				lastIndex = smallestValueIndex;
-				seenIndexes.push(smallestValueIndex);
-			}
-		}
-
-		return timeTaken;
+	function UpdateWords() {
+		passageHandler.GetWordsFromServer(function () {
+			wordIndex = 0;
+			lastInput = "";
+			InitializeTimePressedArray();
+		});
 	}
-
-	function GetSmallestValue(searchArray: Array<number>, seenArray: Array<number>): number {
-		var smallestValueIndex: number = -1;
-
-		if (searchArray == null || searchArray == undefined) return smallestValueIndex;
-
-		// Loop through each of the elements and find the smallest value
-		for (let i = 0; i < searchArray.length; i++) {
-			// If the index is seen, move on
-			if (seenArray != undefined && seenArray != null && seenArray.includes(i)) continue;
-			// If the value is undefined or null, move on
-			if (searchArray[i] == null || searchArray[i] == undefined) continue;
-
-			// If the current number is smaller than our stored number, replace the numbers
-			if (smallestValueIndex == -1 || searchArray[i] < searchArray[smallestValueIndex]) {
-				smallestValueIndex = i;
-			}
-		}
-
-		return smallestValueIndex;
-	}
-
-	function GetTotalTime(): number {
-		var timeTaken = GetTimeTakenArray();
-		var wordsCompleted = GetNumberOfWordsCompleted();
-		var totalTime = 0;
-
-		for (let i = 0; i < wordsCompleted; i++) {
-			const word = timeTaken[i];
-			if (word == null || word == undefined) continue;
-
-			for (let a = 0; a < word.length; a++) {
-				if (word[a] != null || word[a] != undefined) totalTime += word[a];
-			}
-
-		}
-		return totalTime;
-	}
-
-	function GetNumberOfWordsCompleted() {
-		var wordsCompleted = 0
-
-		// Loop through each of the word
-		for (let i = 0; i < passageHandler.wordTags.length; i++) {
-			if (passageHandler.wordTags[i].classList.contains("current")) break;
-
-			wordsCompleted++;
-		}
-
-		return wordsCompleted;
-	}
-
-	function UpdateWords(){
-		passageHandler.GetWordsFromServer(null);
-		wordIndex = 0;
-		lastInput = "";
-		InitializeTimePressedArray();
-	}
-
-	setTimeout(UpdateWords, 10000);
-
-	/*
-	To Do:
-	Check for exceptions in the GetTimeTakenArray function and make the function more readable
-	*/
 });
