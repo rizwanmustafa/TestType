@@ -8,12 +8,39 @@
     <title>{% block title %}{% endblock %}</title>
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}?q={{ styleTime }}">
+
+
+    <style>
+        nav{
+            background-color: white;
+            padding: 10px;
+        }
+
+        a{
+            background-color: black;
+            padding: 2px;
+            border-radius: 2px;
+            color: white;
+            font-family: monospace;
+            text-decoration: none;
+            font-size: 2em;
+        }
+
+        #startingLetterLogo{
+            margin: 2px auto;
+            color:black;
+            background-color: white;
+            padding: 2px;
+        }
+
+    </style>
 </head>
 
 <body>
     <nav>
         <div>
-            <a href="#">Test Type's Prototype</a>
+            <a href="#">
+                <span id="startingLetterLogo">T</span>est Type's Prototype</a>
         </div>
     </nav>
 

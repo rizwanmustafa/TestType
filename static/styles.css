@@ -1,16 +1,18 @@
 body {
   background-color: rgb(50,50,50) !important;
   box-sizing: content-box !important;
+  padding: 0;
+  margin:0;
 }
 
 #typingPlace {
   font-family: monospace;
   font-size: 25px;
-
+  
   width: 100%;
   height: 100%;
+  margin-top: 50px;
 
-  position: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,24 +50,21 @@ body {
 }
 
 word {
-  padding: 3px;
   border-radius: 3px;
   font-weight: 200;
   padding: 2px;
+  color:white;
 }
 
 word.current {
-  color: white;
   background-color: black;
 }
 
 word.correct {
-  color: white;
   background-color: seagreen;
 }
 
 word.onstake, word.wrong{
-    color: white;
     background-color: orange ;
 }
 
