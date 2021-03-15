@@ -1,81 +1,104 @@
 export class PassageStatistics {
-    constructor(wordTags, spanTags, timePressed) {
-        this.SetVariables(wordTags, spanTags, timePressed);
-    }
-    SetVariables(wordTags, spanTags, timePressed) {
+    constructor(wordTags, spanTags, startingTime, timePressed) {
         this.wordTags = wordTags;
         this.spanTags = spanTags;
+        this.startingTime = startingTime;
         this.timePressed = timePressed;
     }
-    GetNumberOfCorrectWords() {
+    GetStatistics() {
+        // Don't calculate any statistics if we haven't typed any word
+        if (this.wordTags[0].classList.contains("current"))
+            return;
         var correctWords = 0;
-        for (let i = 0; i < this.wordTags.length; i++) {
-            if (this.wordTags[i].classList.contains("correct"))
-                correctWords++;
-        }
-        return correctWords;
-    }
-    GetNumberOfWrongWords() {
         var wrongWords = 0;
+        var totalTime = 0;
+        // An array for holding the number of correct entries for each character from A-Z
+        var correctCharNumber = this.GetNumberArray();
+        // An array for holding the number of wrong entries for each character from A-Z
+        var wrongCharNumber = this.GetNumberArray();
+        // An array for holding the total time taken for pressing each character from A-Z
+        var totalTimeChar = this.GetNumberArray();
+        var lastTimePressed = this.startingTime;
         for (let i = 0; i < this.wordTags.length; i++) {
-            if (this.wordTags[i].classList.contains("wrong"))
-                wrongWords++;
-        }
-        return wrongWords;
-    }
-    GetNumberOfCompletedWords() {
-        var completedWords = 0;
-        for (let i = 0; i < this.wordTags.length; i++) {
-            if (this.wordTags[i].classList.contains("current"))
+            const wordTag = this.wordTags[i];
+            // If we have reached the end of where the user has typed, stop!
+            if (wordTag.classList.contains("current"))
                 break;
-            completedWords++;
-        }
-        return completedWords;
-    }
-    GetNumberOfCorrectChars() {
-        var correctChars = 0;
-        this.spanTags.forEach(word => {
-            word.forEach(char => {
-                if (char.classList.contains("correct"))
-                    correctChars++;
-            });
-        });
-        return correctChars;
-    }
-    GetNumberOfWrongChars() {
-        var wrongChars = 0;
-        this.spanTags.forEach(word => {
-            word.forEach(char => {
-                if (char.classList.contains("wrong"))
-                    wrongChars++;
-            });
-        });
-        return wrongChars;
-    }
-    GetTimeTakenArray() {
-        var timeTaken = new Array(this.wordTags.length);
-        for (let i = 0; i < this.wordTags.length; i++) {
-            timeTaken[i] = new Array(this.wordTags[i].textContent.length);
-        }
-        var lastIndex = this.GetSmallestValue(this.timePressed[0], null);
-        for (let i = 0; i < timeTaken.length; i++) {
-            // Create an array to store the seen indexes
-            var seenIndexes = new Array(timeTaken[i].length);
-            var smallestValueIndex = this.GetSmallestValue(this.timePressed[i], seenIndexes);
-            timeTaken[i][this.GetSmallestValue(this.timePressed[i], null)] = this.timePressed[i][smallestValueIndex] - this.timePressed[i == 0 ? 0 : i - 1][lastIndex];
-            lastIndex = smallestValueIndex;
-            seenIndexes.push(smallestValueIndex);
-            while (this.GetSmallestValue(this.timePressed[i], seenIndexes) != -1) {
-                smallestValueIndex = this.GetSmallestValue(this.timePressed[i], seenIndexes);
-                // Set the time taken
-                timeTaken[i][smallestValueIndex] = this.timePressed[i][smallestValueIndex] - this.timePressed[i][lastIndex];
-                lastIndex = smallestValueIndex;
-                seenIndexes.push(smallestValueIndex);
+            const spanTags = this.spanTags[i];
+            const timePressed = this.timePressed[i];
+            if (wordTag.classList.contains("correct"))
+                correctWords++;
+            else
+                wrongWords++;
+            var seenIndexes = new Array(wordTag.textContent.length);
+            var currentIndex = this.GetSmallestValueIndex(timePressed, seenIndexes);
+            while (currentIndex != -1) {
+                var charIndex = this.GetCharIndex(wordTag.textContent[currentIndex]);
+                if (spanTags[currentIndex].classList.contains("wrong"))
+                    wrongCharNumber[charIndex]++;
+                else
+                    correctCharNumber[charIndex]++;
+                // Get and store the time taken for the character
+                const currentTimePressed = timePressed[currentIndex];
+                if (currentTimePressed != null || currentTimePressed != undefined) {
+                    const charTimeTaken = currentTimePressed - lastTimePressed;
+                    totalTime += charTimeTaken;
+                    totalTimeChar[charIndex] += charTimeTaken;
+                    lastTimePressed = currentTimePressed;
+                }
+                seenIndexes.push(currentIndex);
+                currentIndex = this.GetSmallestValueIndex(timePressed, seenIndexes);
             }
         }
-        return timeTaken;
+        const passageResult = new PassageResult();
+        // Get statistics related to word e.g word speed
+        const wordSpeed = Math.floor(correctWords / (totalTime / 60000));
+        const wordAccuracy = Math.floor((correctWords / (wrongWords + correctWords)) * 100);
+        // Set the word statistics
+        passageResult.correctWords = correctWords;
+        passageResult.wrongWords = wrongWords;
+        passageResult.wordSpeed = wordSpeed;
+        passageResult.wordAccuracy = wordAccuracy;
+        // Print the word statistics for now
+        console.log("Correct Words: " + correctWords);
+        console.log("Wrong Words: " + wrongWords);
+        console.log("Words per Minute: " + wordSpeed);
+        console.log("Accuracy: " + wordAccuracy + "%");
+        console.log("\n");
+        passageResult.correctChars = this.GetNumberArray();
+        passageResult.wrongChars = this.GetNumberArray();
+        passageResult.charSpeeds = this.GetNumberArray();
+        passageResult.charAccuracies = this.GetNumberArray();
+        // Get statistics related to char e.g char speed
+        for (let i = 0; i < 26; i++) {
+            const charSpeed = Math.floor(correctCharNumber[i] / (totalTimeChar[i] / 60000));
+            const charAccuracy = Math.floor((correctCharNumber[i] / (wrongCharNumber[i] + correctCharNumber[i]) * 100));
+            // Set the statistics for the characters
+            passageResult.correctChars[i] = correctCharNumber[i];
+            passageResult.wrongChars[i] = wrongCharNumber[i];
+            passageResult.charSpeeds[i] = charSpeed;
+            passageResult.charAccuracies[i] = charAccuracy;
+            // Print the character statistics for now
+            console.log("Character: " + String.fromCharCode(i + 65));
+            console.log("Correct inputs: " + correctCharNumber[i]);
+            console.log("Wrong inputs: " + wrongCharNumber[i]);
+            console.log("Characters per Minute: " + charSpeed);
+            console.log("Character Accuracy: " + charAccuracy + "%");
+            console.log("\n");
+        }
+        return passageResult;
     }
-    GetSmallestValue(searchArray, seenArray) {
+    GetNumberArray() {
+        var array = new Array(26);
+        for (var i = 0; i < array.length; i++) {
+            array[i] = 0;
+        }
+        return array;
+    }
+    GetCharIndex(char) {
+        return char.toUpperCase().charCodeAt(0) - 65;
+    }
+    GetSmallestValueIndex(searchArray, seenArray) {
         var smallestValueIndex = -1;
         if (searchArray == null || searchArray == undefined)
             return smallestValueIndex;
@@ -84,9 +107,9 @@ export class PassageStatistics {
             // If the index is seen, move on
             if (seenArray != undefined && seenArray != null && seenArray.includes(i))
                 continue;
-            // If the value is undefined or null, move on
+            // If the value is undefined or null, return the value
             if (searchArray[i] == null || searchArray[i] == undefined)
-                continue;
+                return i;
             // If the current number is smaller than our stored number, replace the numbers
             if (smallestValueIndex == -1 || searchArray[i] < searchArray[smallestValueIndex]) {
                 smallestValueIndex = i;
@@ -94,24 +117,17 @@ export class PassageStatistics {
         }
         return smallestValueIndex;
     }
-    GetTotalTime() {
-        var timeTaken = this.GetTimeTakenArray();
-        var totalTime = 0;
-        for (let i = 0; i < this.wordTags.length; i++) {
-            const word = timeTaken[i];
-            if (word == null || word == undefined)
-                continue;
-            for (let a = 0; a < word.length; a++) {
-                if (word[a] != null || word[a] != undefined)
-                    totalTime += word[a];
-            }
-        }
-        return totalTime;
-    }
-    GetWordSpeed(netSpeed) {
-        var totalTime = this.GetTotalTime() / 60000;
-        var totalWords = netSpeed ? this.GetNumberOfCorrectWords() : this.GetNumberOfCompletedWords();
-        return Math.floor(totalWords / totalTime);
+}
+export class PassageResult {
+    constructor() {
+        this.correctWords = 0;
+        this.wrongWords = 0;
+        this.wordSpeed = 0;
+        this.wordAccuracy = 0;
+        this.correctChars = new Array(26);
+        this.wrongChars = new Array(26);
+        this.charSpeeds = new Array(26);
+        this.charAccuracies = new Array(26);
     }
 }
 //# sourceMappingURL=PassageStatistics.js.map

@@ -35,74 +35,72 @@ export class PassageHandler {
             this.spanTags = Array<NodeListOf<HTMLSpanElement>>(this.wordTags.length);
             for (let i = 0; i < this.wordTags.length; i++)
                 this.spanTags[i] = this.wordTags[i].querySelectorAll("span");
-            this.MarkWordTagAsCurrent(0);
-            if(successiveFunction != undefined || successiveFunction != null) successiveFunction();
+            this.FormatWordTagAsCurrent(0);
+            if (successiveFunction != undefined || successiveFunction != null) successiveFunction();
         })
     }
 
     public ValidateAndFormatWord(wordIndex: number, userInput: String, wordCompleted: boolean) {
-        if(wordIndex >= this.wordTags.length) return;
+        if (wordIndex >= this.wordTags.length) return;
         const word = this.wordArray[wordIndex];
         const wordTag = this.wordTags[wordIndex];
 
-        wordTag.classList.remove("wrong");
+        // Remove any previous formatting on the word tag
+        this.UnformatWordTag(wordIndex);
 
+        if (userInput == word) {
+            wordTag.classList.add("correct"); return;
+        }
+        else if (userInput.length < word.length && !wordCompleted) {
+            this.wordTags[wordIndex].classList.add("current");
+            this.spanTags[wordIndex][userInput.length].classList.add("current");
+        }
+
+        // If the user's input length is greater than the length of the word
+        // Or if the user's input is not the same as the word and the user moves to next word
+        // Mark the word as wrong
         if (userInput.length > word.length || (userInput != word && wordCompleted)) {
             wordTag.classList.add("wrong");
         }
-        
-        if (userInput.length < word.length && wordCompleted == true) {
-            // Add wrong class to span tags that have not been typed if user moved to next word
-            for (let i = userInput.length; i < word.length; i++) {
+
+
+        for (var i = 0; i < word.length; i++) {
+            if (i >= userInput.length && !wordCompleted) break;
+            if (userInput[i] != word[i]) {
+                // If user did not input the current character and the word was supposed to be completed
+                // Or the user input was wrong
+                // Mark the word and the character as wrong
+                this.wordTags[wordIndex].classList.add("wrong");
                 this.spanTags[wordIndex][i].classList.add("wrong");
             }
-        }
-
-        for (let i = 0; i < userInput.length; i++) {
-            const char = userInput[i];
-            const spanTag = this.spanTags[wordIndex][i];
-
-            // If the user's input's length is greater than the word length
-            // Mark the word as wrong
-            if (i >= word.length) {
-                wordTag.classList.add("wrong");
-                break;
-            }
-
-            // If the current character does not match the corresponding character
-            // Mark the character and the word wrong
-            if (char != word[i]) {
-                wordTag.classList.add("wrong");
-                spanTag.classList.add("wrong");
-            }
             else {
-                spanTag.classList.remove("wrong");
+                this.spanTags[wordIndex][i].classList.add("correct");
             }
         }
     }
 
-    public MarkWordTagAsCurrent(wordIndex: number) {
-
-        const tag = this.wordTags[wordIndex];
+    public FormatWordTagAsCurrent(wordIndex: number) {
         // Add current class to the tag and the first span of the tag
-        tag.classList.add("current")
+        this.wordTags[wordIndex].classList.add("current")
         this.spanTags[wordIndex][0].classList.add("current")
     }
 
     public UnformatWordTag(wordIndex: number) {
         // Remove any classes from the word tag and its children span tags
         this.wordTags[wordIndex].classList.value = "";
-        this.UnformatSpanTags(wordIndex);
-    }
-
-    public UnformatSpanTags(wordIndex: number) {
-        // Remove any known classes from the child span tags
         this.spanTags[wordIndex].forEach(spanTag => {
             spanTag.classList.value = "";
         })
     }
 
-    public GetIndexOfNewLine(wordIndex: number): boolean {
+    public HideWordTagsUntilIndex(wordIndex: number) {
+        // Hide all word tags until index by changing their display value
+        for (let i = 0; i <= wordIndex; i++) {
+            this.wordTags[i].style.display = "none";
+        }
+    }
+
+    public IsNewLineStarting(wordIndex: number): boolean {
         // If this is the last word, return true anyways
         if (wordIndex + 1 >= this.wordArray.length)
             return true;
@@ -113,12 +111,4 @@ export class PassageHandler {
         else
             return false;
     }
-
-    public HideWordTagsUntilIndex(wordIndex: number) {
-        for (let i = 0; i <= wordIndex; i++) {
-            const element = this.wordTags[i] as HTMLElement;
-            element.style.display = "none";
-        }
-    }
-
 }

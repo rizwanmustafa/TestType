@@ -1,137 +1,142 @@
-import { PassageHandler } from './PassageHandler.js'
-import { PassageStatistics } from './PassageStatistics.js';
+import { PassageHandler } from "./PassageHandler.js";
+import { PassageResult, PassageStatistics } from "./PassageStatistics.js";
 
-const typeSpace = document.querySelector("#typeSpace") as HTMLInputElement;
-const passageHandler = new PassageHandler();
+const passageHandler: PassageHandler = new PassageHandler();
 
-// Get words from server
 passageHandler.GetWordsFromServer(function () {
+    // Initialize variables for later use
+    const typeTextBox = document.querySelector("#typeTextBox") as HTMLInputElement;
+    var wordIndex: number = 0;
+    var lastInput: String = "";
+    var timePressed: Array<Array<number>> = new Array(passageHandler.wordArray.length);
+    var startingTime = -1;
+    ResetTimePressedArray();
+
+    typeTextBox.addEventListener("input", OnInput);
+
+    // This function handles input for the textbox
+    function OnInput(e: Event) {
+        // Store the necessary variables like current time
+        const currentTime: number = Date.now();
+        const target: HTMLInputElement = e.target as HTMLInputElement;
+        const userInput: String = target.value;
 
 
-	//Store time taken for each character
-	var timePressed: Array<Array<number>> = new Array<Array<number>>(passageHandler.wordArray.length);
-	InitializeTimePressedArray();
-	var lastInput = "";
+        /*---------------------------------------------------------------------------------*/
+        /* Deal with any exceptions or special cases */
+        // If the user has already completed the test, just reset the value of the textbox
+        if (wordIndex >= passageHandler.wordArray.length) {
+            const passageResult = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
+            console.log(passageResult.GetStatistics());
+            target.value = "";
+            return;
+        }
+        // If the user input is same as before, do nothing
+        // Or if the input is empty, reset the formatting on the word tag and do no more
+        if (userInput == lastInput) return;
+        else if (userInput == "") {
+            passageHandler.UnformatWordTag(wordIndex);
+            passageHandler.FormatWordTagAsCurrent(wordIndex);
+            return;
+        }
+        /*-------------------------------------------------------------------------------- */
 
-	let wordIndex: number = 0
-	passageHandler.MarkWordTagAsCurrent(wordIndex)
+        // Set the starting time if it has not been already set
+        if (startingTime == -1) startingTime = currentTime;
 
-	// Add event when user types
-	document.querySelector("#typeSpace").addEventListener("input", OnInput)
+        // Move to the next word if the user inputs space at the end of the word
+        if (target.value[target.value.length - 1] == " ") {
 
-	// Handle user input
-	function OnInput(e: Event) {
-		const currentTime = Date.now();
-		const target = e.target as HTMLInputElement;
-		var userInput = target.value;
+            // Remove time for any character that has not yet been typed
+            for (let i = userInput.length; i < passageHandler.wordArray[wordIndex].length; i++) {
+                timePressed[wordIndex][i] = undefined;
+            }
 
-		// Do not do anything if the user has already finished their exercise
-		if (wordIndex >= passageHandler.wordArray.length) {
-			// Get Results and log them in the console for now
-			var passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, timePressed);
-			console.log("WPM: " + passageStats.GetWordSpeed(true));
-			target.value = "";
-			return;
-		}
+            // Hide all previous words if the next word is on a new line
+            if (wordIndex >= passageHandler.wordArray.length - 1 || passageHandler.IsNewLineStarting(wordIndex)) {
+                passageHandler.HideWordTagsUntilIndex(wordIndex)
+                target.value = "";
+            }
 
-		if (userInput == lastInput) return;
-		else if (userInput == "") {
-			passageHandler.UnformatWordTag(wordIndex);
-			passageHandler.MarkWordTagAsCurrent(wordIndex);
-			return;
-		}
+            // Move to the next word
+            MoveToNextWord(userInput.substr(0, userInput.length - 1));
 
-		//Get current cursor place
-		const charIndex = target.selectionStart - 1;
-		//Store time for current char
+        }
+        else {
+            passageHandler.ValidateAndFormatWord(wordIndex, userInput, false);
 
-		// Get place where the input changed and shift the values accordingly
-		if (typeSpace.selectionStart != userInput.length) {
-			// Check if the user has removed the character or added one
-			if (userInput.length < lastInput.length) {
-				ShiftValuesToLeft(charIndex);
-			}
-			else if (userInput.length > lastInput.length) {
-				ShiftValuesToRight(charIndex);
-			}
-		}
+            // Get index of the char which was edited
+            const charIndex = target.selectionStart - 1;
+            // Get place where the input changed and shift the values accordingly
+            if (typeTextBox.selectionStart != userInput.length) {
+                // Check if the user has removed the character or added one
+                if (userInput.length < lastInput.length) {
+                    ShiftValuesToLeft(charIndex);
+                }
+                else if (userInput.length > lastInput.length) {
+                    ShiftValuesToRight(charIndex);
+                }
+            }
 
-		// A char was added so set the time it was pressed
-		if (charIndex < passageHandler.wordArray[wordIndex].length && lastInput.length < userInput.length) {
-			timePressed[wordIndex][charIndex] = currentTime;
-		}
+            // A char was added so set the time it was pressed
+            if (charIndex < passageHandler.wordArray[wordIndex].length && lastInput.length < userInput.length) {
+                timePressed[wordIndex][charIndex] = currentTime;
+            }
+            // Remove time for any character that has not yet been typed
+            for (let i = userInput.length; i < passageHandler.wordArray[wordIndex].length; i++) {
+                timePressed[wordIndex][i] = undefined;
+            }
 
-		// Remove time for any character that has not yet been typed
-		for (let i = userInput.length; i < passageHandler.wordArray[wordIndex].length; i++) {
-			timePressed[wordIndex][i] = undefined;
-		}
+        }
 
-		lastInput = userInput;
+        lastInput = userInput;
+    }
 
-		if (userInput[userInput.length - 1] == " ") {
+    // This function resets the array values
+    function ResetTimePressedArray() {
+        for (let i = 0; i < passageHandler.wordArray.length; i++) {
+            timePressed[i] = new Array<number>(passageHandler.wordArray[i].length);
+        }
+    }
 
-			if (wordIndex >= passageHandler.wordArray.length - 1 || passageHandler.GetIndexOfNewLine(wordIndex)) {
-				passageHandler.HideWordTagsUntilIndex(wordIndex)
-				target.value = "";
-			}
-			userInput = userInput.trim()
-			passageHandler.UnformatWordTag(wordIndex)
-			// Validate this word and move on to the next one
-			if (userInput == passageHandler.wordArray[wordIndex]) {
-				passageHandler.wordTags[wordIndex].classList.add("correct")
-			}
-			else {
-				passageHandler.ValidateAndFormatWord(wordIndex, userInput, true);
-			}
+    // Use when the user adds a character in between the word
+    function ShiftValuesToRight(index: number) {
+        for (let i = passageHandler.wordArray[wordIndex].length - 1; i > index; i--)
+            timePressed[wordIndex][i] = timePressed[wordIndex][i - 1];
+    }
 
-			MoveToNextWord();
-		}
-		else {
-			userInput = userInput.trim()
-			// Remove any classes from all span tags
-			passageHandler.UnformatSpanTags(wordIndex)
+    // Use when the user removes a character in between the word
+    function ShiftValuesToLeft(index: number) {
+        for (let i = index + 2; i < timePressed[wordIndex].length; i++) {
+            timePressed[wordIndex][i - 1] = timePressed[wordIndex][i];
+        }
+    }
 
-			// Add "current" class to the current span tag
-			if (userInput.length < passageHandler.wordArray[wordIndex].length) {
-				passageHandler.spanTags[wordIndex][userInput.length].classList.add("current");
-			}
+    function MoveToNextWord(userInput: String) {
+        // Unformat the current word and format it again to highlight any mistakes the user made
+        passageHandler.UnformatWordTag(wordIndex);
+        passageHandler.ValidateAndFormatWord(wordIndex, userInput, true);
 
-			passageHandler.ValidateAndFormatWord(wordIndex, userInput, false);
-		}
-	}
+        // Reset the values of the textbox
+        lastInput = "";
+        typeTextBox.value = "";
 
-	function InitializeTimePressedArray() {
-		for (let i = 0; i < passageHandler.wordArray.length; i++) {
-			timePressed[i] = new Array<number>(passageHandler.wordArray[i].length);
-		}
-	}
+        // Increment the wordIndex and do not execute the remaining code if the user has finished the test
+        wordIndex++;
+        if (wordIndex >=  passageHandler.wordTags.length) return;
 
-	// Use when the user adds a character in between the word
-	function ShiftValuesToRight(index: number) {
-		for (let i = passageHandler.wordArray[wordIndex].length - 1; i > index; i--)
-			timePressed[wordIndex][i] = timePressed[wordIndex][i - 1];
-	}
+        // Format the current word tag
+            passageHandler.FormatWordTagAsCurrent(wordIndex);
+    }
 
-	// Use when the user removes a character in between the word
-	function ShiftValuesToLeft(index: number) {
-		for (let i = index + 2; i < timePressed[wordIndex].length; i++) {
-			timePressed[wordIndex][i - 1] = timePressed[wordIndex][i];
-		}
-	}
+    function UpdateWords() {
+        passageHandler.GetWordsFromServer(function () {
+            wordIndex = 0;
+            lastInput = "";
+            startingTime = -1;
+            typeTextBox.value = "";
+            ResetTimePressedArray();
+        });
+    }
 
-	function MoveToNextWord() {
-		wordIndex++;
-		if (wordIndex >= passageHandler.wordTags.length) return;
-		lastInput = "";
-		passageHandler.MarkWordTagAsCurrent(wordIndex)
-		typeSpace.value = "";
-	}
-
-	function UpdateWords() {
-		passageHandler.GetWordsFromServer(function () {
-			wordIndex = 0;
-			lastInput = "";
-			InitializeTimePressedArray();
-		});
-	}
-});
+}); 
