@@ -76,3 +76,25 @@ span.current {
   color: black;
   background-color: white;
 }
+
+nav{
+  background-color: white;
+  padding: 10px;
+}
+
+a{
+  background-color: black;
+  padding: 2px;
+  border-radius: 2px;
+  color: white;
+  font-family: monospace;
+  text-decoration: none;
+  font-size: 2em;
+}
+
+#startingLetterLogo{
+  margin: 2px auto;
+  color:black;
+  background-color: white;
+  padding: 2px;
+}
