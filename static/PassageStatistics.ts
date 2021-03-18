@@ -68,8 +68,18 @@ export class PassageStatistics {
 
         const passageResult = new PassageResult();
 
+        var longLength = 0;
+        for (let i = 0; i < this.wordTags.length; i++) {
+            const wordTag = this.wordTags[i];
+            if (wordTag.classList.contains("current")) break;
+
+            if (!wordTag.classList.contains("wrong")) longLength += wordTag.textContent.length;
+        }
+
+        const realCorrectWords = longLength / 5;
+
         // Get statistics related to word e.g word speed
-        const wordSpeed = Math.floor(correctWords / (totalTime / 60000));
+        const wordSpeed = Math.floor(realCorrectWords / (totalTime / 60000));
         const wordAccuracy = Math.floor((correctWords / (wrongWords + correctWords)) * 100);
 
         // Set the word statistics
