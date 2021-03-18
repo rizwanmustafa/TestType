@@ -1,30 +1,20 @@
 body {
-  background-color: rgb(50,50,50) ;
+  background-color: rgb(50, 50, 50);
   box-sizing: content-box;
   padding: 0;
-  margin:0;
+  margin: 0;
 }
 
 #typingPlace {
   font-family: monospace;
   font-size: 25px;
-  
-  width: 100%;
-  height: 100%;
   margin-top: 50px;
 
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#innerTypingPlace {
-  height: max-content;
-  overflow: hidden;
+  flex-direction: column;
 }
 
 #typeText {
-  width: 700px;
   height: 50px;
   overflow-y: hidden;
   border-left: 2px solid white;
@@ -39,21 +29,26 @@ body {
   outline: none;
   border: none;
   border-bottom: 2px solid white;
-  width: 700px;
 
   padding: 5px 15px;
   margin: 10px;
   font-size: 25px;
   font-family: monospace;
-  background-color: rgb(30,30,30);
+  background-color: rgb(30, 30, 30);
   color: white;
 }
 
+#typeText,
+#typeTextBox {
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+}
 word {
   border-radius: 3px;
   font-weight: 200;
   padding: 2px;
-  color:white;
+  color: white;
 }
 
 word.current {
@@ -64,12 +59,13 @@ word.correct {
   background-color: seagreen;
 }
 
-word.onstake, word.wrong{
-    background-color: orange ;
+word.onstake,
+word.wrong {
+  background-color: orange;
 }
 
-span.wrong{
-    color: red;
+span.wrong {
+  color: red;
 }
 
 span.current {
@@ -77,12 +73,12 @@ span.current {
   background-color: white;
 }
 
-nav{
+nav {
   background-color: white;
   padding: 10px;
 }
 
-a{
+a {
   background-color: black;
   padding: 2px;
   border-radius: 2px;
@@ -92,57 +88,65 @@ a{
   font-size: 2em;
 }
 
-#startingLetterLogo{
+#startingLetterLogo {
   margin: 2px auto;
-  color:black;
+  color: black;
   background-color: white;
 }
 
-#masterResultDiv{
+#masterResultDiv {
   display: none;
   justify-content: center;
 }
 
-.resultDiv{
+.resultDiv {
   margin: 20px;
-  padding:  10px 20px 15px 20px;
-  width:300px;
+  padding: 10px 20px 15px 20px;
+  width: 300px;
   border: 2px solid white;
-  color:white;
+  color: white;
   font-family: "Lato", sans-serif;
 }
 
-.statisticDiv{
+.statisticDiv {
   padding: 5px;
   display: flex;
   justify-content: space-between;
 }
 
-.statisticLabel{
+.statisticLabel {
   align-self: flex-start;
 }
 
-.statistic{
+.statistic {
   align-self: flex-end;
 }
 
-.centerAlign { text-align: center; }
+.centerAlign {
+  text-align: center;
+}
 
-#charListDiv{
+#charListDiv {
   margin-top: 20px;
   margin-left: auto;
   margin-right: auto;
   max-width: max-content;
-  user-select: none ;
+  user-select: none;
   display: none;
 }
 
-.charDiv{
-  display:inline-block;
+.charDiv {
+  display: inline-block;
   background-color: white;
   font-family: "Lato", sans-serif;
   padding: 2px 0px;
   width: 20px;
   text-align: center;
   border-radius: 2px;
+}
+
+.masterContentBox {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
 }
