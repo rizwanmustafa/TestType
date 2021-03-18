@@ -81,7 +81,7 @@ passageHandler.GetWordsFromServer(function () {
             }
 
             // A char was added so set the time it was pressed
-            if (charIndex < passageHandler.wordArray[wordIndex].length && lastInput.length < userInput.length) {
+            if (charIndex < passageHandler.wordArray[wordIndex].length && lastInput.length <= userInput.length) {
                 timePressed[wordIndex][charIndex] = currentTime;
             }
             // Remove time for any character that has not yet been typed
@@ -89,9 +89,8 @@ passageHandler.GetWordsFromServer(function () {
                 timePressed[wordIndex][i] = undefined;
             }
 
+            lastInput = userInput;
         }
-
-        lastInput = userInput;
     }
 
     // This function resets the array values
@@ -120,8 +119,8 @@ passageHandler.GetWordsFromServer(function () {
         passageHandler.ValidateAndFormatWord(wordIndex, userInput, true);
 
         // Reset the values of the textbox
-        lastInput = "";
         typeTextBox.value = "";
+        lastInput = "";
 
         // Increment the wordIndex and do not execute the remaining code if the user has finished the test
         wordIndex++;

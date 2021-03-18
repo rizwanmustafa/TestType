@@ -85,7 +85,7 @@ export class PassageStatistics {
             // Set the statistics for the characters
             passageResult.correctChars[i] = correctCharNumber[i];
             passageResult.wrongChars[i] = wrongCharNumber[i];
-            if (correctCharNumber[i] == 0 || wrongCharNumber[i] == 0) {
+            if (correctCharNumber[i] == 0) {
                 passageResult.charSpeeds[i] = 0;
                 passageResult.charAccuracies[i] = 0;
             }
