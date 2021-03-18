@@ -5,9 +5,37 @@ body {
   margin: 0;
 }
 
+.masterContentBox {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+nav {
+  background-color: white;
+  padding: 10px;
+  font-size: 1.4em;
+}
+
+nav a {
+  background-color: black;
+  padding: 4px;
+  border-radius: 2px;
+  color: white;
+  font-family: monospace;
+  text-decoration: none;
+  font-size: 2em;
+}
+
+#startingLetterLogo {
+  margin: 2px auto;
+  color: black;
+  background-color: white;
+}
+
 #typingPlace {
   font-family: monospace;
-  font-size: 25px;
+  font-size: 2.5em;
   margin-top: 50px;
 
   display: flex;
@@ -15,7 +43,7 @@ body {
 }
 
 #typeText {
-  height: 50px;
+  height: 2em;
   overflow-y: hidden;
   border-left: 2px solid white;
   padding-left: 10px;
@@ -29,10 +57,9 @@ body {
   outline: none;
   border: none;
   border-bottom: 2px solid white;
-
   padding: 5px 15px;
   margin: 10px;
-  font-size: 25px;
+  font-size: 1em;
   font-family: monospace;
   background-color: rgb(30, 30, 30);
   color: white;
@@ -44,6 +71,7 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+
 word {
   border-radius: 3px;
   font-weight: 200;
@@ -73,33 +101,32 @@ span.current {
   background-color: white;
 }
 
-nav {
-  background-color: white;
-  padding: 10px;
+#charList {
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: max-content;
+  user-select: none;
+  display: none;
 }
 
-a {
-  background-color: black;
-  padding: 2px;
+.char {
+  display: inline-block;
+  background-color: white;
+  font-family: "Lato", sans-serif;
+  padding: 2px 0px;
+  width: 20px;
+  text-align: center;
   border-radius: 2px;
-  color: white;
-  font-family: monospace;
-  text-decoration: none;
-  font-size: 2em;
+  cursor: pointer;
 }
 
-#startingLetterLogo {
-  margin: 2px auto;
-  color: black;
-  background-color: white;
-}
-
-#masterResultDiv {
+#results {
   display: none;
   justify-content: center;
 }
 
-.resultDiv {
+.resultBox {
   margin: 20px;
   padding: 10px 20px 15px 20px;
   width: 300px;
@@ -122,31 +149,12 @@ a {
   align-self: flex-end;
 }
 
-.centerAlign {
-  text-align: center;
+#correctWords,
+#correctChars {
+  color: seagreen;
 }
 
-#charListDiv {
-  margin-top: 20px;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: max-content;
-  user-select: none;
-  display: none;
-}
-
-.charDiv {
-  display: inline-block;
-  background-color: white;
-  font-family: "Lato", sans-serif;
-  padding: 2px 0px;
-  width: 20px;
-  text-align: center;
-  border-radius: 2px;
-}
-
-.masterContentBox {
-  max-width: 1600px;
-  margin-left: auto;
-  margin-right: auto;
+#wrongWords,
+#wrongChars {
+  color: red;
 }

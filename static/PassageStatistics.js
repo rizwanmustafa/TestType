@@ -63,7 +63,7 @@ export class PassageStatistics {
         console.log(longLength);
         console.log(realCorrectWords);
         // Get statistics related to word e.g word speed
-        const wordSpeed = Math.floor(realCorrectWords / (totalTime / 60000));
+        const wordSpeed = correctWords == 0 ? 0 : Math.floor(realCorrectWords / (totalTime / 60000));
         const wordAccuracy = Math.floor((correctWords / (wrongWords + correctWords)) * 100);
         // Set the word statistics
         passageResult.correctWords = correctWords;
@@ -85,7 +85,7 @@ export class PassageStatistics {
             // Set the statistics for the characters
             passageResult.correctChars[i] = correctCharNumber[i];
             passageResult.wrongChars[i] = wrongCharNumber[i];
-            if (correctCharNumber[i] == 0 && wrongCharNumber[i] == 0) {
+            if (correctCharNumber[i] == 0 || wrongCharNumber[i] == 0) {
                 passageResult.charSpeeds[i] = 0;
                 passageResult.charAccuracies[i] = 0;
             }
@@ -100,7 +100,7 @@ export class PassageStatistics {
         document.getElementById("charAccuracy").textContent = passageResult.charAccuracies[0].toString() + "%";
         document.getElementById("correctChars").textContent = passageResult.correctChars[0].toString();
         document.getElementById("wrongChars").textContent = passageResult.wrongChars[0].toString();
-        document.querySelectorAll(".charDiv").forEach(charDiv => {
+        document.querySelectorAll(".char").forEach(charDiv => {
             charDiv.addEventListener("click", (e) => {
                 const clickedDiv = e.target;
                 const charIndex = this.GetCharIndex(clickedDiv.textContent);
@@ -111,8 +111,8 @@ export class PassageStatistics {
                 document.getElementById("wrongChars").textContent = passageResult.wrongChars[charIndex].toString();
             });
         });
-        document.getElementById("charListDiv").style.display = "block";
-        document.getElementById("masterResultDiv").style.display = "flex";
+        document.getElementById("charList").style.display = "block";
+        document.getElementById("results").style.display = "flex";
         return passageResult;
     }
     GetNumberArray() {
