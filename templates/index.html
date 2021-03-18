@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Test Type Prototype {% endblock %}
+{% block title %}Test Type Beta{% endblock %}
 {% block content %}
 <div id="typingPlace">
     <div id="innerTypingPlace">
@@ -18,39 +18,40 @@
 
         <div class="statisticDiv">
             <span class="statisticLabel">Accuracy: </span>
-            <span class="statistic" id="wordSpeed">96%</span>
+            <span class="statistic" id="wordAccuracy">96%</span>
         </div>
 
         <div class="statisticDiv">
-            <span class="statisticLabel">Correct Words: </span>
-            <span class="statistic" id="wordSpeed">48</span>
+            <span class="statisticLabel">Correct Inputs: </span>
+            <span class="statistic" id="wordCorrectInputNum">48</span>
         </div>
 
         <div class="statisticDiv">
-            <span class="statisticLabel">Wrong Words: </span>
-            <span class="statistic" id="wordSpeed">2</span>
+            <span class="statisticLabel">Wrong Inputs: </span>
+            <span class="statistic" id="wordWrongInputNum">2</span>
         </div>
     </div>
     <div class="resultDiv">
-        <h3 class="centerAlign">Character Statistics</h3>
+        <h3 class="centerAlign">Character Statistics - <span id="charName">A</span></h3>
+        
         <div class="statisticDiv">
-            <span class="statisticLabel">Character: </span>
-            <span class="statistic" id="wordSpeed">A</span>
+            <span class="statisticLabel">Speed (Characters Per Minute): </span>
+            <span class="statistic" id="charSpeed">328</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Accuracy: </span>
-            <span class="statistic" id="wordSpeed">96%</span>
+            <span class="statistic" id="charAccuracy">96%</span>
         </div>
 
         <div class="statisticDiv">
-            <span class="statisticLabel">Correct Words: </span>
-            <span class="statistic" id="wordSpeed">48</span>
+            <span class="statisticLabel">Correct Inputs: </span>
+            <span class="statistic" id="charCorrectInputNum">48</span>
         </div>
 
         <div class="statisticDiv">
-            <span class="statisticLabel">Wrong Words: </span>
-            <span class="statistic" id="wordSpeed">2</span>
+            <span class="statisticLabel">Wrong Inputs: </span>
+            <span class="statistic" id="charWrongInputNum">2</span>
         </div>
     </div>
 </div>
