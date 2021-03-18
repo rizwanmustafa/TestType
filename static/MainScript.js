@@ -32,6 +32,8 @@ passageHandler.GetWordsFromServer(function () {
         else if (userInput == "") {
             passageHandler.UnformatWordTag(wordIndex);
             passageHandler.FormatWordTagAsCurrent(wordIndex);
+            // Remove any stored time
+            timePressed[wordIndex] = new Array(passageHandler.wordArray[wordIndex].length);
             return;
         }
         /*-------------------------------------------------------------------------------- */

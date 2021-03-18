@@ -37,6 +37,8 @@ passageHandler.GetWordsFromServer(function () {
         else if (userInput == "") {
             passageHandler.UnformatWordTag(wordIndex);
             passageHandler.FormatWordTagAsCurrent(wordIndex);
+            // Remove any stored time
+            timePressed[wordIndex] = new Array<number>(passageHandler.wordArray[wordIndex].length);
             return;
         }
         /*-------------------------------------------------------------------------------- */
@@ -123,10 +125,10 @@ passageHandler.GetWordsFromServer(function () {
 
         // Increment the wordIndex and do not execute the remaining code if the user has finished the test
         wordIndex++;
-        if (wordIndex >=  passageHandler.wordTags.length) return;
+        if (wordIndex >= passageHandler.wordTags.length) return;
 
         // Format the current word tag
-            passageHandler.FormatWordTagAsCurrent(wordIndex);
+        passageHandler.FormatWordTagAsCurrent(wordIndex);
     }
 
     function UpdateWords() {
@@ -139,4 +141,4 @@ passageHandler.GetWordsFromServer(function () {
         });
     }
 
-}); 
+});

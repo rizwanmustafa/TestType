@@ -78,13 +78,10 @@ export class PassageStatistics {
         passageResult.wordSpeed = wordSpeed;
         passageResult.wordAccuracy = wordAccuracy;
 
-
-        // Print the word statistics for now
-        console.log("Correct Words: " + correctWords);
-        console.log("Wrong Words: " + wrongWords);
-        console.log("Words per Minute: " + wordSpeed);
-        console.log("Accuracy: " + wordAccuracy + "%");
-        console.log("\n");
+        document.getElementById("wordSpeed").textContent = wordSpeed.toString();
+        document.getElementById("wordAccuracy").textContent = wordAccuracy.toString() + "%";
+        document.getElementById("correctWords").textContent = correctWords.toString();
+        document.getElementById("wrongWords").textContent = wrongWords.toString();
 
         passageResult.correctChars = this.GetNumberArray();
         passageResult.wrongChars = this.GetNumberArray();
@@ -99,18 +96,38 @@ export class PassageStatistics {
             // Set the statistics for the characters
             passageResult.correctChars[i] = correctCharNumber[i];
             passageResult.wrongChars[i] = wrongCharNumber[i];
-            passageResult.charSpeeds[i] = charSpeed;
-            passageResult.charAccuracies[i] = charAccuracy;
-
-
-            // Print the character statistics for now
-            console.log("Character: " + String.fromCharCode(i + 65));
-            console.log("Correct inputs: " + correctCharNumber[i]);
-            console.log("Wrong inputs: " + wrongCharNumber[i]);
-            console.log("Characters per Minute: " + charSpeed);
-            console.log("Character Accuracy: " + charAccuracy + "%");
-            console.log("\n");
+            if (correctCharNumber[i] == 0 && wrongCharNumber[i] == 0) {
+                passageResult.charSpeeds[i] = 0;
+                passageResult.charAccuracies[i] = 0;
+            }
+            else {
+                passageResult.charSpeeds[i] = charSpeed;
+                passageResult.charAccuracies[i] = charAccuracy;
+            }
         }
+
+        // Set the character statistics for A
+        document.getElementById("charName").textContent = "A";
+        document.getElementById("charSpeed").textContent = passageResult.charSpeeds[0].toString();
+        document.getElementById("charAccuracy").textContent = passageResult.charAccuracies[0].toString() + "%";
+        document.getElementById("correctChars").textContent = passageResult.correctChars[0].toString();
+        document.getElementById("wrongChars").textContent = passageResult.wrongChars[0].toString();
+
+        document.querySelectorAll(".charDiv").forEach(charDiv => {
+            charDiv.addEventListener("click", (e: Event) => {
+                const clickedDiv = e.target as HTMLElement;
+                const charIndex = this.GetCharIndex(clickedDiv.textContent);
+
+                document.getElementById("charName").textContent = clickedDiv.textContent[0];
+                document.getElementById("charSpeed").textContent = passageResult.charSpeeds[charIndex].toString();
+                document.getElementById("charAccuracy").textContent = passageResult.charAccuracies[charIndex].toString() + "%";
+                document.getElementById("correctChars").textContent = passageResult.correctChars[charIndex].toString();
+                document.getElementById("wrongChars").textContent = passageResult.wrongChars[charIndex].toString();
+            });
+        })
+
+        document.getElementById("charListDiv").style.display = "block";
+        document.getElementById("masterResultDiv").style.display = "flex";
 
         return passageResult;
     }
