@@ -7,6 +7,54 @@
         <input type="text" id="typeTextBox" autofocus>
     </div>
 </div>
+
+<div id="masterResultDiv">
+    <div class="resultDiv">
+        <h3 class="centerAlign">Word Statistics</h3>
+        <div class="statisticDiv">
+            <span class="statisticLabel">Speed (Words Per Minute): </span>
+            <span class="statistic" id="wordSpeed">43</span>
+        </div>
+
+        <div class="statisticDiv">
+            <span class="statisticLabel">Accuracy: </span>
+            <span class="statistic" id="wordSpeed">96%</span>
+        </div>
+
+        <div class="statisticDiv">
+            <span class="statisticLabel">Correct Words: </span>
+            <span class="statistic" id="wordSpeed">48</span>
+        </div>
+
+        <div class="statisticDiv">
+            <span class="statisticLabel">Wrong Words: </span>
+            <span class="statistic" id="wordSpeed">2</span>
+        </div>
+    </div>
+    <div class="resultDiv">
+        <h3 class="centerAlign">Character Statistics</h3>
+        <div class="statisticDiv">
+            <span class="statisticLabel">Character: </span>
+            <span class="statistic" id="wordSpeed">A</span>
+        </div>
+
+        <div class="statisticDiv">
+            <span class="statisticLabel">Accuracy: </span>
+            <span class="statistic" id="wordSpeed">96%</span>
+        </div>
+
+        <div class="statisticDiv">
+            <span class="statisticLabel">Correct Words: </span>
+            <span class="statistic" id="wordSpeed">48</span>
+        </div>
+
+        <div class="statisticDiv">
+            <span class="statisticLabel">Wrong Words: </span>
+            <span class="statistic" id="wordSpeed">2</span>
+        </div>
+    </div>
+</div>
+
 <script type="module" src="{{ url_for('static', filename='MainScript.js') }}?q={{ script1Time }}" defer></script>
 <script type="module" src="{{ url_for('static', filename='PassageHandler.js') }}?q={{ script2Time }}" defer></script>
 <script type="module" src="{{ url_for('static', filename='PassageStatistics.js') }}?q={{ script3Time }}" defer></script>

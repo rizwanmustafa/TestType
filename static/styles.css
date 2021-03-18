@@ -98,3 +98,33 @@ a{
   background-color: white;
   padding: 2px;
 }
+
+#masterResultDiv{
+  display: flex;
+  justify-content: center;
+}
+
+.resultDiv{
+  margin: 20px;
+  padding:  10px 20px 15px 20px;
+  width:300px;
+  border: 2px solid white;
+  color:white;
+  font-family: "Lato", sans-serif;
+}
+
+.statisticDiv{
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.statisticLabel{
+  align-self: flex-start;
+}
+
+.statistic{
+  align-self: flex-end;
+}
+
+.centerAlign { text-align: center; }
