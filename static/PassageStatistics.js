@@ -51,17 +51,15 @@ export class PassageStatistics {
             }
         }
         const passageResult = new PassageResult();
-        var longLength = 0;
+        var correctChars = 0;
         for (let i = 0; i < this.wordTags.length; i++) {
             const wordTag = this.wordTags[i];
             if (wordTag.classList.contains("current"))
                 break;
             if (wordTag.classList.contains("correct"))
-                longLength += wordTag.textContent.length;
+                correctChars += wordTag.textContent.length;
         }
-        const realCorrectWords = Math.floor(longLength / 5);
-        console.log(longLength);
-        console.log(realCorrectWords);
+        const realCorrectWords = Math.floor(correctChars / 5);
         // Get statistics related to word e.g word speed
         const wordSpeed = correctWords == 0 ? 0 : Math.floor(realCorrectWords / (totalTime / 60000));
         const wordAccuracy = Math.floor((correctWords / (wrongWords + correctWords)) * 100);
@@ -147,10 +145,12 @@ export class PassageStatistics {
 }
 export class PassageResult {
     constructor() {
+        // General Statistics
         this.correctWords = 0;
         this.wrongWords = 0;
         this.wordSpeed = 0;
         this.wordAccuracy = 0;
+        // Individual Statistics
         this.correctChars = new Array(26);
         this.wrongChars = new Array(26);
         this.charSpeeds = new Array(26);

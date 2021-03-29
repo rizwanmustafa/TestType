@@ -18,10 +18,11 @@ passageHandler.GetWordsFromServer(function () {
         const userInput = target.value;
         /*---------------------------------------------------------------------------------*/
         /* Deal with any exceptions or special cases */
-        // If the user has already completed the test, just reset the value of the textbox
+        // If the user has already completed the test, show the statistics of current lesson and get new words
         if (wordIndex >= passageHandler.wordArray.length) {
             const passageResult = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
-            console.log(passageResult.GetStatistics());
+            passageResult.GetStatistics();
+            UpdateWords();
             target.value = "";
             return;
         }
@@ -32,7 +33,7 @@ passageHandler.GetWordsFromServer(function () {
         else if (userInput == "") {
             passageHandler.UnformatWordTag(wordIndex);
             passageHandler.FormatWordTagAsCurrent(wordIndex);
-            // Remove any stored time
+            // Remove any stored time for this word
             timePressed[wordIndex] = new Array(passageHandler.wordArray[wordIndex].length);
             return;
         }
