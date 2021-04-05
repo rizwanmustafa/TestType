@@ -129,9 +129,7 @@ def GetLoginState() -> bool:
 @app.context_processor
 def utility_processor():
     def AddModifiedTime(filePath):
-        print(filePath)
         newFilePath = filePath + "?p=" + str(int(os.path.getmtime(filePath[1:])))
-        print(newFilePath)
         return newFilePath
     return dict(AddModifiedTime=AddModifiedTime)
 
