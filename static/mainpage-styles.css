@@ -1,0 +1,125 @@
+#typingPlace {
+    font-family: monospace;
+    font-size: 2.5em;
+    margin-top: 50px;
+  
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #typeText {
+    height: 2em;
+    overflow-y: hidden;
+    border-left: 2px solid white;
+    padding-left: 10px;
+    margin: 10px;
+    padding: 10px;
+    user-select: none;
+    color: white;
+  }
+  
+  #typeTextBox {
+    outline: none;
+    border: none;
+    border-bottom: 2px solid white;
+    padding: 5px 15px;
+    margin: 10px;
+    font-size: 1em;
+    font-family: monospace;
+    background-color: rgb(30, 30, 30);
+    color: white;
+  }
+  
+  #typeText,
+  #typeTextBox {
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  word {
+    border-radius: 3px;
+    font-weight: 200;
+    padding: 2px;
+    color: white;
+  }
+  
+  word.current {
+    background-color: black;
+  }
+  
+  word.correct {
+    background-color: seagreen;
+  }
+  
+  word.onstake,
+  word.wrong {
+    background-color: orange;
+  }
+  
+  span.wrong {
+    color: red;
+  }
+  
+  span.current {
+    color: black;
+    background-color: white;
+  }
+  
+  #charList {
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: max-content;
+    user-select: none;
+    display: none;
+  }
+  
+  .char {
+    display: inline-block;
+    background-color: white;
+    font-family: "Lato", sans-serif;
+    padding: 2px 0px;
+    width: 20px;
+    text-align: center;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  
+  #results {
+    display: none;
+    justify-content: center;
+  }
+  
+  .resultBox {
+    margin: 20px;
+    padding: 10px 20px 15px 20px;
+    width: 300px;
+    border: 2px solid white;
+    color: white;
+    font-family: "Lato", sans-serif;
+  }
+  
+  .statisticDiv {
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .statisticLabel {
+    align-self: flex-start;
+  }
+  
+  .statistic {
+    align-self: flex-end;
+  }
+  
+  #correctWords,
+  #correctChars {
+    color: seagreen;
+  }
+  
+  #wrongWords,
+  #wrongChars {
+    color: red;
+  }

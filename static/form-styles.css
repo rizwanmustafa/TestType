@@ -1,0 +1,48 @@
+/* Stylesheet to be used on login and signup pages */
+
+form {
+  margin-top: 20vh;
+  margin-left: auto;
+  margin-right: auto;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 2px solid white;
+  padding: 20px;
+}
+
+form h1 {
+  color: white;
+  font-family: monospace;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 2.5em;
+}
+
+form a {
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  padding: 10px;
+}
+
+input {
+  outline: none;
+  border: none;
+  border-bottom: 2px solid white;
+  padding: 10px 15px;
+  margin: 10px;
+  font-family: monospace;
+  background-color: rgb(30, 30, 30);
+  color: white;
+  font-size: 1.5em;
+  width: 400px;
+}
+
+input[type="submit"] {
+  width: max-content;
+  padding: 7px 50px;
+  margin-left: auto;
+  margin-right: auto;
+}

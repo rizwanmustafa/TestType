@@ -8,13 +8,21 @@
     <title>{% block title %}{% endblock %}</title>
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}?q={{ styleTime }}">
+    {% block scripts %}{% endblock %}
 </head>
 
 <body>
     <nav>
         <div class="masterContentBox">
-            <a href="#">
+            <a href="#" id="logoTxt">
                 <span style="margin-top: 2px;" id="startingLetterLogo">T</span>est Type
+            </a>
+            <div id="loginStatus">
+                {% if loggedIn == True %}
+                <a href="/logout">Logout</a>
+                {% elif loggedIn == False %}
+                <a href="/login">Login</a> | <a href="/signup">Signup</a>
+                {% endif%}
             </a>
         </div>
     </nav>
