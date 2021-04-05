@@ -7,14 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
 
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}?q={{ styleTime }}">
+    <link rel="stylesheet" type="text/css" href="{{ AddModifiedTime(url_for('static', filename='styles.css')) }}">
     {% block scripts %}{% endblock %}
 </head>
 
 <body>
     <nav>
         <div class="masterContentBox">
-            <a href="#" id="logoTxt">
+            <a href="/" id="logoTxt">
                 <span style="margin-top: 2px;" id="startingLetterLogo">T</span>est Type
             </a>
             <div id="loginStatus">

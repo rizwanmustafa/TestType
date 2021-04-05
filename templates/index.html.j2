@@ -1,7 +1,7 @@
 {% extends "base.html.j2" %}
 {% block title %}Test Type Beta{% endblock %}
 {% block scripts %}
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='mainpage-styles.css') }}?q={{ styleTime }}">
+  <link rel="stylesheet" type="text/css" href="{{ AddModifiedTime(url_for('static', filename='mainpage-styles.css')) }}">
 {% endblock %}
 {% block content %}
 <div id="typingPlace">
