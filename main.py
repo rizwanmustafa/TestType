@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request, session, redirect
-from Utility import GetRandomWords, HashPassword, ValidateUserData
+from Utility import GetRandomWords, HashPassword, ValidateUserData, clamp
 import os.path
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,7 +12,7 @@ app.config[
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-dbModels : dict = {}
+dbModels: dict = {}
 
 
 @app.route("/", methods=['GET'])
@@ -170,6 +170,67 @@ def AddResult(username):
         return jsonify("Result added!")
     else:
         return jsonify("Result not added!")
+
+
+@app.route("/API/GetWeakestKey/<username>")
+def GetWeakestKey(username):
+    foundUser = User.query.filter_by(username=username).first()
+    if foundUser:  # Store the result only if the user exists
+        # Get table class for the specific user
+        tableName = "results" + username
+        if tableName not in dbModels:
+            dbModels[tableName] = GetUserResultTable(username)
+
+        # Get all the results
+        userResults = dbModels[tableName].query.all()
+        if len(userResults) == 0:
+            return jsonify("No results submitted by the user!")
+        charScores: list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        minLimit = clamp(len(userResults)-3, 0, len(userResults))
+
+        def GetCharScore(charString: str):
+            charInfo = charString.split(';')
+            return int(charInfo[1]) * int(charInfo[2])
+
+        # Add the scores for the characters for the last 3 lessons at max
+        for x in range(minLimit, len(userResults)):
+            charScores[0] += GetCharScore(userResults[x].A)
+            charScores[1] += GetCharScore(userResults[x].B)
+            charScores[2] += GetCharScore(userResults[x].C)
+            charScores[3] += GetCharScore(userResults[x].D)
+            charScores[4] += GetCharScore(userResults[x].E)
+            charScores[5] += GetCharScore(userResults[x].F)
+            charScores[6] += GetCharScore(userResults[x].G)
+            charScores[7] += GetCharScore(userResults[x].H)
+            charScores[8] += GetCharScore(userResults[x].I)
+            charScores[9] += GetCharScore(userResults[x].J)
+            charScores[10] += GetCharScore(userResults[x].K)
+            charScores[11] += GetCharScore(userResults[x].L)
+            charScores[12] += GetCharScore(userResults[x].M)
+            charScores[13] += GetCharScore(userResults[x].N)
+            charScores[14] += GetCharScore(userResults[x].O)
+            charScores[15] += GetCharScore(userResults[x].P)
+            charScores[16] += GetCharScore(userResults[x].Q)
+            charScores[17] += GetCharScore(userResults[x].R)
+            charScores[18] += GetCharScore(userResults[x].S)
+            charScores[19] += GetCharScore(userResults[x].T)
+            charScores[20] += GetCharScore(userResults[x].U)
+            charScores[21] += GetCharScore(userResults[x].V)
+            charScores[22] += GetCharScore(userResults[x].W)
+            charScores[23] += GetCharScore(userResults[x].X)
+            charScores[24] += GetCharScore(userResults[x].Y)
+            charScores[25] += GetCharScore(userResults[x].Z)
+
+        minCharIndex = 0
+        for x in range(26):
+            # Take average of the scores and find the weakest key
+            charScores[x] = int(charScores[x] / (len(userResults) - minLimit))
+            if charScores[x] < charScores[minCharIndex]:
+                minCharIndex = x
+        return jsonify(chr(minCharIndex + 65))
+    else:
+        return jsonify("User not found")
 
 
 def GetLoginState() -> bool:

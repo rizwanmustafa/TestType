@@ -67,3 +67,12 @@ def ValidateUserData(username: str, email: str, password: str):
         return "Password must contain both an alphabet and a number"
 
     return ""
+
+
+def clamp(value: int, minValue: int, maxValue: int):
+    if value >= maxValue:
+        return maxValue
+    elif value <= minValue:
+        return minValue
+    else:
+        return value
