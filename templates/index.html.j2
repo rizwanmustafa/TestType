@@ -9,6 +9,8 @@
         <input type="text" id="typeTextBox" autofocus>
 </div>
 
+<span style="display:none" id="username">{{ username }}</span>
+
 <div id="charList">
     <div class="char">A</div>
     <div class="char">B</div>
@@ -87,7 +89,7 @@
     </div>
 </div>
 
-<script type="module" src="{{ url_for('static', filename='MainScript.js') }}?q={{ script1Time }}" defer></script>
-<script type="module" src="{{ url_for('static', filename='PassageHandler.js') }}?q={{ script2Time }}" defer></script>
-<script type="module" src="{{ url_for('static', filename='PassageStatistics.js') }}?q={{ script3Time }}" defer></script>
+<script type="module" src="{{ AddModifiedTime(url_for('static', filename='MainScript.js')) }}" defer></script>
+<script type="module" src="{{ AddModifiedTime(url_for('static', filename='PassageHandler.js')) }}" defer></script>
+<script type="module" src="{{ AddModifiedTime(url_for('static', filename='PassageStatistics.js')) }}" defer></script>
 {% endblock %}

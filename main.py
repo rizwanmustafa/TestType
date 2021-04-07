@@ -15,7 +15,8 @@ db = SQLAlchemy(app)
 
 @app.route("/", methods=['GET'])
 def index():
-    return render_template("index.html.j2",  loggedIn=GetLoginState())
+    username = session["username"] if "username" in session else ""
+    return render_template("index.html.j2",  loggedIn=GetLoginState(), username=username)
 
 # Later check if the user is logged in. If yes, then send personalized words
 
@@ -51,6 +52,7 @@ def SignUp():
                 newuser = User(username, email, hashedPassword, saltUsed)
                 db.session.add(newuser)
                 db.session.commit()
+                session['username'] = username
                 return redirect("/")
             else:
                 if usernameExists:
@@ -111,6 +113,59 @@ def IsUserAvailable(username):
         return jsonify("0")
 
 
+@app.route("/API/AddResult/<username>", methods=['POST'])
+def AddResult(username):
+    foundUser = User.query.filter_by(username=username).first()
+    if foundUser:  # Store the result only if the user exists
+        # Get the user result table and create all database models
+        userResultTable = GetUserResultTable(username)()
+        db.create_all()
+
+        # Process the results
+        correctChars = request.json[0]
+        wrongChars = request.json[1]
+        charAccuracies = request.json[2]
+        charSpeeds = request.json[3]
+
+        def GetCharResult(charNum: int):
+            return str(correctChars[charNum] + wrongChars[charNum]) + ";" + str(charAccuracies[charNum]) + ";" + str(charSpeeds[charNum])
+
+        userResultTable.A = GetCharResult(0)
+        userResultTable.B = GetCharResult(1)
+        userResultTable.C = GetCharResult(2)
+        userResultTable.D = GetCharResult(3)
+        userResultTable.E = GetCharResult(4)
+        userResultTable.F = GetCharResult(5)
+        userResultTable.G = GetCharResult(6)
+        userResultTable.H = GetCharResult(7)
+        userResultTable.I = GetCharResult(8)
+        userResultTable.J = GetCharResult(9)
+        userResultTable.K = GetCharResult(10)
+        userResultTable.L = GetCharResult(11)
+        userResultTable.M = GetCharResult(12)
+        userResultTable.N = GetCharResult(13)
+        userResultTable.O = GetCharResult(14)
+        userResultTable.P = GetCharResult(15)
+        userResultTable.Q = GetCharResult(16)
+        userResultTable.R = GetCharResult(17)
+        userResultTable.S = GetCharResult(18)
+        userResultTable.T = GetCharResult(19)
+        userResultTable.U = GetCharResult(20)
+        userResultTable.V = GetCharResult(21)
+        userResultTable.W = GetCharResult(22)
+        userResultTable.X = GetCharResult(23)
+        userResultTable.Y = GetCharResult(24)
+        userResultTable.Z = GetCharResult(25)
+
+        # Add the results into the database
+        db.session.add(userResultTable)
+        db.session.commit()
+
+        return jsonify("Result added!")
+    else:
+        return jsonify("Result not added!")
+
+
 def GetLoginState() -> bool:
     return "username" in session
 
@@ -126,7 +181,7 @@ def utility_processor():
 
 def GetUserResultTable(username):
     tabledict = {
-        'passageToken': db.Column(db.String(32), nullable=False, primary_key=True),
+        'passageToken': db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True),
         'A': db.Column(db.String(15), nullable=False),
         'B': db.Column(db.String(15), nullable=False),
         'C': db.Column(db.String(15), nullable=False),

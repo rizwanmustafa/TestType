@@ -1,3 +1,5 @@
+import { PassageResult } from "./PassageStatistics";
+
 export class PassageHandler {
     // Public variables
     wordArray: Array<String>;
@@ -110,5 +112,22 @@ export class PassageHandler {
             return true;
         else
             return false;
+    }
+
+    public SendResult(username: string, passageResult: PassageResult) {
+        // Send user Result data to server
+        fetch("/API/AddResult/"+username, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify([
+                passageResult.correctChars,
+                passageResult.wrongChars,
+                passageResult.charAccuracies,
+                passageResult.charSpeeds,
+            ])
+        }).then(response => response.json()).then(response => alert(response))
     }
 }

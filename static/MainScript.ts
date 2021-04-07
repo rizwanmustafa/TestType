@@ -1,10 +1,11 @@
 import { PassageHandler } from "./PassageHandler.js";
-import { PassageStatistics } from "./PassageStatistics.js";
+import { PassageResult, PassageStatistics } from "./PassageStatistics.js";
 
 const passageHandler: PassageHandler = new PassageHandler();
 
 passageHandler.GetWordsFromServer(function () {
     // Initialize variables for later use
+    const username = document.querySelector("#username").textContent;
     const typeTextBox = document.querySelector("#typeTextBox") as HTMLInputElement;
     var wordIndex: number = 0;
     var lastInput: String = "";
@@ -26,9 +27,9 @@ passageHandler.GetWordsFromServer(function () {
         /* Deal with any exceptions or special cases */
         // If the user has already completed the test, show the statistics of current lesson and get new words
         if (wordIndex >= passageHandler.wordArray.length) {
-            const passageResult = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
-            passageResult.GetStatistics();
-            UpdateWords();
+            const passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
+            const passageResult = passageStats.GetStatistics();
+            UpdateWords(passageResult);
             target.value = "";
             return;
         }
@@ -131,8 +132,11 @@ passageHandler.GetWordsFromServer(function () {
         passageHandler.FormatWordTagAsCurrent(wordIndex);
     }
 
-    function UpdateWords() {
+    function UpdateWords(passageStats: PassageResult) {
         passageHandler.GetWordsFromServer(function () {
+            if (username != "") {
+                passageHandler.SendResult(username, passageStats)
+            }
             wordIndex = 0;
             lastInput = "";
             startingTime = -1;

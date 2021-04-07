@@ -20,9 +20,10 @@ passageHandler.GetWordsFromServer(function () {
         /* Deal with any exceptions or special cases */
         // If the user has already completed the test, show the statistics of current lesson and get new words
         if (wordIndex >= passageHandler.wordArray.length) {
-            const passageResult = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
-            passageResult.GetStatistics();
-            UpdateWords();
+            const passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
+            const passageResult = passageStats.GetStatistics();
+            console.log(passageResult);
+            UpdateWords("rizwanmustafa0000", passageResult);
             target.value = "";
             return;
         }
@@ -111,8 +112,9 @@ passageHandler.GetWordsFromServer(function () {
         // Format the current word tag
         passageHandler.FormatWordTagAsCurrent(wordIndex);
     }
-    function UpdateWords() {
+    function UpdateWords(username, passageStats) {
         passageHandler.GetWordsFromServer(function () {
+            passageHandler.SendResult(username, passageStats);
             wordIndex = 0;
             lastInput = "";
             startingTime = -1;

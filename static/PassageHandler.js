@@ -94,5 +94,21 @@ export class PassageHandler {
         else
             return false;
     }
+    SendResult(username, passageResult) {
+        // Send user Result data to server
+        fetch("/API/AddResult/" + username, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify([
+                passageResult.correctChars,
+                passageResult.wrongChars,
+                passageResult.charAccuracies,
+                passageResult.charSpeeds,
+            ])
+        }).then(response => response.json()).then(response => alert(response));
+    }
 }
 //# sourceMappingURL=PassageHandler.js.map
