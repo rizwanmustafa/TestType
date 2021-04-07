@@ -12,6 +12,8 @@ app.config[
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+dbModels : dict = {}
+
 
 @app.route("/", methods=['GET'])
 def index():
@@ -118,7 +120,11 @@ def AddResult(username):
     foundUser = User.query.filter_by(username=username).first()
     if foundUser:  # Store the result only if the user exists
         # Get the user result table and create all database models
-        userResultTable = GetUserResultTable(username)()
+        tableName = "results" + username
+        if tableName not in dbModels:
+            dbModels[tableName] = GetUserResultTable(username)
+
+        userResultTable = dbModels[tableName]()
         db.create_all()
 
         # Process the results
