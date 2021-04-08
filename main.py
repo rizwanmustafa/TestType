@@ -125,6 +125,7 @@ def AddResult(username):
         tableName = "results" + username
         if tableName not in dbModels:
             dbModels[tableName] = GetUserResultTable(username)
+            db.create_all()
 
         userResultTable = dbModels[tableName]()
         db.create_all()
@@ -177,13 +178,14 @@ def AddResult(username):
 @app.route("/API/GetPassage/<username>/<passageLength>")
 def GetPersonalizedPassage(username, passageLength):
     weakestKey = GetWeakestKey(username)
+    passageLength = int(passageLength)
     if weakestKey == "":
-        return GetRandomWords(passageLength)
+        return GetWords()
     else:
         sourceList = json.loads(WordList.query.filter_by(
             character=weakestKey).first().wordList)
         userPassage = ""
-        for x in range(int(passageLength)):
+        for x in range(passageLength):
             userPassage += sourceList[randrange(0, len(sourceList))] + " "
 
         userPassage = userPassage[:-1]
@@ -196,6 +198,7 @@ def GetWeakestKey(username):
         tableName = "results" + username
         if tableName not in dbModels:
             dbModels[tableName] = GetUserResultTable(username)
+            db.create_all()
 
         # Get all the results
         userResults = dbModels[tableName].query.all()
