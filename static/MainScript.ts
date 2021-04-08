@@ -2,10 +2,10 @@ import { PassageHandler } from "./PassageHandler.js";
 import { PassageResult, PassageStatistics } from "./PassageStatistics.js";
 
 const passageHandler: PassageHandler = new PassageHandler();
+const username = document.querySelector("#username").textContent;
 
 passageHandler.GetWordsFromServer(function () {
     // Initialize variables for later use
-    const username = document.querySelector("#username").textContent;
     const typeTextBox = document.querySelector("#typeTextBox") as HTMLInputElement;
     var wordIndex: number = 0;
     var lastInput: String = "";
@@ -133,16 +133,15 @@ passageHandler.GetWordsFromServer(function () {
     }
 
     function UpdateWords(passageStats: PassageResult) {
-        passageHandler.GetWordsFromServer(function () {
-            if (username != "") {
-                passageHandler.SendResult(username, passageStats)
-            }
-            wordIndex = 0;
-            lastInput = "";
-            startingTime = -1;
-            typeTextBox.value = "";
-            ResetTimePressedArray();
-        });
+        passageHandler.SendResult(username, passageStats, ()=> {
+            passageHandler.GetWordsFromServer(function () {
+                wordIndex = 0;
+                lastInput = "";
+                startingTime = -1;
+                typeTextBox.value = "";
+                ResetTimePressedArray();
+            }, username);
+        })
     }
 
-});
+}, username);

@@ -2,6 +2,8 @@ from flask import Flask, render_template, jsonify, request, session, redirect
 from Utility import GetRandomWords, HashPassword, ValidateUserData, clamp
 import os.path
 from flask_sqlalchemy import SQLAlchemy
+import json
+from random import randrange
 
 app = Flask(__name__)
 app.secret_key = "8MHdc9SYGEH$4l92OU*FELXrA50Fh*z%mJRTgGpHHebzc*N5UP"
@@ -172,7 +174,21 @@ def AddResult(username):
         return jsonify("Result not added!")
 
 
-@app.route("/API/GetWeakestKey/<username>")
+@app.route("/API/GetPassage/<username>/<passageLength>")
+def GetPersonalizedPassage(username, passageLength):
+    weakestKey = GetWeakestKey(username)
+    if weakestKey == "":
+        return GetRandomWords(passageLength)
+    else:
+        sourceList = json.loads(WordList.query.filter_by(
+            character=weakestKey).first().wordList)
+        userPassage = ""
+        for x in range(int(passageLength)):
+            userPassage += sourceList[randrange(0, len(sourceList))] + " "
+
+        userPassage = userPassage[:-1]
+        return jsonify(userPassage.split())
+
 def GetWeakestKey(username):
     foundUser = User.query.filter_by(username=username).first()
     if foundUser:  # Store the result only if the user exists
@@ -184,7 +200,7 @@ def GetWeakestKey(username):
         # Get all the results
         userResults = dbModels[tableName].query.all()
         if len(userResults) == 0:
-            return jsonify("No results submitted by the user!")
+            return ""
         charScores: list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         minLimit = clamp(len(userResults)-3, 0, len(userResults))
@@ -228,9 +244,9 @@ def GetWeakestKey(username):
             charScores[x] = int(charScores[x] / (len(userResults) - minLimit))
             if charScores[x] < charScores[minCharIndex]:
                 minCharIndex = x
-        return jsonify(chr(minCharIndex + 65))
+        return chr(minCharIndex + 65)
     else:
-        return jsonify("User not found")
+        return ""
 
 
 def GetLoginState() -> bool:
@@ -292,6 +308,12 @@ class User(db.Model):
         self.email = email
         self.hashedPassword = hashedPassword
         self.saltUsed = saltUsed
+
+
+class WordList(db.Model):
+    __tablename__ = "WordList"
+    character = db.Column(db.String(1), nullable=False, primary_key=True)
+    wordList = db.Column(db.String(900), nullable=False)
 
 
 if __name__ == "__main__":

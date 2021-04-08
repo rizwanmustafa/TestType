@@ -7,10 +7,17 @@ export class PassageHandler {
     spanTags: Array<NodeListOf<HTMLSpanElement>>;
 
     // Get Words Later for more sessions without reloading webpage
-    public GetWordsFromServer(successiveFunction) {
-        fetch("/GetWords").then(response => {
-            if (response.status == 200)
+    public GetWordsFromServer(successiveFunction, username: string) {
+        var finalURL: string = "";
+        if (username == "") finalURL = "/GetWords"
+        else finalURL = "/API/GetPassage/" + username + "/50"
+        console.log(finalURL)
+        fetch(finalURL).then(response => {
+            if (response.status == 200) {
+
+                console.log(response)
                 return response.json();
+            }
             else
                 alert("Could not connect to server!");
         }).then(wordsJSON => {
@@ -114,20 +121,23 @@ export class PassageHandler {
             return false;
     }
 
-    public SendResult(username: string, passageResult: PassageResult) {
+    public SendResult(username: string, passageResult: PassageResult, successiveFunction) {
         // Send user Result data to server
-        fetch("/API/AddResult/"+username, {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify([
-                passageResult.correctChars,
-                passageResult.wrongChars,
-                passageResult.charAccuracies,
-                passageResult.charSpeeds,
-            ])
-        }).then(response => response.json()).then(response => alert(response))
+        if (username != "") {
+            fetch("/API/AddResult/" + username, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify([
+                    passageResult.correctChars,
+                    passageResult.wrongChars,
+                    passageResult.charAccuracies,
+                    passageResult.charSpeeds,
+                ])
+            })
+        }
+        if (successiveFunction != undefined || successiveFunction != null) successiveFunction();
     }
 }

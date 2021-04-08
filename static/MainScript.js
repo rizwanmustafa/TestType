@@ -1,6 +1,7 @@
 import { PassageHandler } from "./PassageHandler.js";
 import { PassageStatistics } from "./PassageStatistics.js";
 const passageHandler = new PassageHandler();
+const username = document.querySelector("#username").textContent;
 passageHandler.GetWordsFromServer(function () {
     // Initialize variables for later use
     const typeTextBox = document.querySelector("#typeTextBox");
@@ -22,8 +23,7 @@ passageHandler.GetWordsFromServer(function () {
         if (wordIndex >= passageHandler.wordArray.length) {
             const passageStats = new PassageStatistics(passageHandler.wordTags, passageHandler.spanTags, startingTime, timePressed);
             const passageResult = passageStats.GetStatistics();
-            console.log(passageResult);
-            UpdateWords("rizwanmustafa0000", passageResult);
+            UpdateWords(passageResult);
             target.value = "";
             return;
         }
@@ -112,15 +112,16 @@ passageHandler.GetWordsFromServer(function () {
         // Format the current word tag
         passageHandler.FormatWordTagAsCurrent(wordIndex);
     }
-    function UpdateWords(username, passageStats) {
-        passageHandler.GetWordsFromServer(function () {
-            passageHandler.SendResult(username, passageStats);
-            wordIndex = 0;
-            lastInput = "";
-            startingTime = -1;
-            typeTextBox.value = "";
-            ResetTimePressedArray();
+    function UpdateWords(passageStats) {
+        passageHandler.SendResult(username, passageStats, () => {
+            passageHandler.GetWordsFromServer(function () {
+                wordIndex = 0;
+                lastInput = "";
+                startingTime = -1;
+                typeTextBox.value = "";
+                ResetTimePressedArray();
+            }, username);
         });
     }
-});
+}, username);
 //# sourceMappingURL=MainScript.js.map

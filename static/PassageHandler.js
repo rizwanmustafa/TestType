@@ -1,9 +1,17 @@
 export class PassageHandler {
     // Get Words Later for more sessions without reloading webpage
-    GetWordsFromServer(successiveFunction) {
-        fetch("/GetWords").then(response => {
-            if (response.status == 200)
+    GetWordsFromServer(successiveFunction, username) {
+        var finalURL = "";
+        if (username == "")
+            finalURL = "/GetWords";
+        else
+            finalURL = "/API/GetPassage/" + username + "/50";
+        console.log(finalURL);
+        fetch(finalURL).then(response => {
+            if (response.status == 200) {
+                console.log(response);
                 return response.json();
+            }
             else
                 alert("Could not connect to server!");
         }).then(wordsJSON => {
@@ -94,21 +102,25 @@ export class PassageHandler {
         else
             return false;
     }
-    SendResult(username, passageResult) {
+    SendResult(username, passageResult, successiveFunction) {
         // Send user Result data to server
-        fetch("/API/AddResult/" + username, {
-            method: "POST",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify([
-                passageResult.correctChars,
-                passageResult.wrongChars,
-                passageResult.charAccuracies,
-                passageResult.charSpeeds,
-            ])
-        }).then(response => response.json()).then(response => alert(response));
+        if (username != "") {
+            fetch("/API/AddResult/" + username, {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify([
+                    passageResult.correctChars,
+                    passageResult.wrongChars,
+                    passageResult.charAccuracies,
+                    passageResult.charSpeeds,
+                ])
+            });
+        }
+        if (successiveFunction != undefined || successiveFunction != null)
+            successiveFunction();
     }
 }
 //# sourceMappingURL=PassageHandler.js.map
