@@ -191,6 +191,7 @@ def GetPersonalizedPassage(username, passageLength):
         userPassage = userPassage[:-1]
         return jsonify(userPassage.split())
 
+
 def GetWeakestKey(username):
     foundUser = User.query.filter_by(username=username).first()
     if foundUser:  # Store the result only if the user exists

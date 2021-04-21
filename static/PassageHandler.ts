@@ -7,15 +7,12 @@ export class PassageHandler {
     spanTags: Array<NodeListOf<HTMLSpanElement>>;
 
     // Get Words Later for more sessions without reloading webpage
-    public GetWordsFromServer(successiveFunction, username: string) {
+    public GetWordsFromServer(successiveFunction: Function, username: string) {
         var finalURL: string = "";
         if (username == "") finalURL = "/GetWords"
         else finalURL = "/API/GetPassage/" + username + "/50"
-        console.log(finalURL)
         fetch(finalURL).then(response => {
             if (response.status == 200) {
-
-                console.log(response)
                 return response.json();
             }
             else
@@ -34,7 +31,7 @@ export class PassageHandler {
 
                 finalHTML += "</word><wbr> ";
             });
-            finalHTML = finalHTML.substr(0, finalHTML.length - 1);
+            finalHTML = finalHTML.substring(0, finalHTML.length - 1);
 
             const typeText = document.querySelector("#typeText");
             typeText.innerHTML = finalHTML;

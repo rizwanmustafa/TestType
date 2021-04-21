@@ -73,7 +73,7 @@ export class PassageStatistics {
             const wordTag = this.wordTags[i];
             if (wordTag.classList.contains("current")) break;
 
-            if (wordTag.classList.contains("correct")) correctChars += wordTag.textContent.length;
+            if (wordTag.classList.contains("correct")) correctChars += wordTag.textContent.length +1;
         }
 
         const realCorrectWords = Math.floor(correctChars / 5);

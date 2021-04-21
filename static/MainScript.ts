@@ -133,7 +133,7 @@ passageHandler.GetWordsFromServer(function () {
     }
 
     function UpdateWords(passageStats: PassageResult) {
-        passageHandler.SendResult(username, passageStats, ()=> {
+        passageHandler.SendResult(username, passageStats, () => {
             passageHandler.GetWordsFromServer(function () {
                 wordIndex = 0;
                 lastInput = "";

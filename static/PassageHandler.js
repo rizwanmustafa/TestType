@@ -6,10 +6,8 @@ export class PassageHandler {
             finalURL = "/GetWords";
         else
             finalURL = "/API/GetPassage/" + username + "/50";
-        console.log(finalURL);
         fetch(finalURL).then(response => {
             if (response.status == 200) {
-                console.log(response);
                 return response.json();
             }
             else
@@ -25,7 +23,7 @@ export class PassageHandler {
                     finalHTML += "<span>" + word[i] + "</span>";
                 finalHTML += "</word><wbr> ";
             });
-            finalHTML = finalHTML.substr(0, finalHTML.length - 1);
+            finalHTML = finalHTML.substring(0, finalHTML.length - 1);
             const typeText = document.querySelector("#typeText");
             typeText.innerHTML = finalHTML;
             // Get word and span tags
