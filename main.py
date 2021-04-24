@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request, session, redirect
 from Utility import GetRandomWords, HashPassword, ValidateUserData, clamp
-import os.path
+from os import path
 from flask_sqlalchemy import SQLAlchemy
 import json
 from random import randrange
@@ -27,7 +27,7 @@ def index():
 
 @app.route("/GetWords", methods=['GET'])
 def GetWords():
-    return jsonify(GetRandomWords(50).split(" "))
+    return jsonify(GetRandomWords(app, 50).split(" "))
 
 
 @app.route("/signup", methods=['GET', 'POST'])
@@ -259,11 +259,13 @@ def GetLoginState() -> bool:
 
 @app.context_processor
 def utility_processor():
-    def AddModifiedTime(filePath):
-        newFilePath = filePath + "?p=" + \
-            str(int(os.path.getmtime(filePath[1:])))
+    def modified_url_for(foldername, filename):
+        realFilePath = path.join(app.root_path, foldername, filename)
+        modifiedTime = str(int(path.getmtime(realFilePath)))
+        newFilePath = '/' + foldername + '/' + filename + '?q=' + modifiedTime
+        print(newFilePath)
         return newFilePath
-    return dict(AddModifiedTime=AddModifiedTime)
+    return dict(modified_url_for=modified_url_for)
 
 
 def GetUserResultTable(username):

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
 
-    <link rel="stylesheet" type="text/css" href="{{ AddModifiedTime(url_for('static', filename='styles.css')) }}">
+    <link rel="stylesheet" type="text/css" href="{{ modified_url_for('static', filename='styles.css') }}">
     <link rel="shortcut icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico')}}">
     {% block scripts %}{% endblock %}
 </head>

@@ -1,15 +1,19 @@
 from random import randint
-from pathlib import Path
 import json
 import os
 import hashlib
 import re
 
-fileContent = Path("Words.json").read_text()
-words = json.loads(fileContent)
+words = None
 
 
-def GetRandomWords(passageLength):
+def GetRandomWords(app, passageLength: int):
+    global words
+    if words == None:
+        jsonFile = app.open_resource("Words.json")
+        words = json.loads(jsonFile.read())
+        jsonFile.close()
+
     passage: str = ""
 
     for x in range(0, passageLength):
@@ -20,7 +24,7 @@ def GetRandomWords(passageLength):
     return passage
 
 
-def HashPassword(password: str, saltUsed=None):
+def HashPassword(password: str, saltUsed: bytes = None):
     if saltUsed == None:
         saltUsed = os.urandom(32)
 

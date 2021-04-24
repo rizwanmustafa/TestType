@@ -1,7 +1,7 @@
 {% extends "base.html.j2" %}
 {% block title %}Test Type Beta{% endblock %}
 {% block scripts %}
-  <link rel="stylesheet" type="text/css" href="{{ AddModifiedTime(url_for('static', filename='mainpage-styles.css')) }}">
+  <link rel="stylesheet" type="text/css" href="{{ modified_url_for('static', filename='mainpage-styles.css') }}">
 {% endblock %}
 {% block content %}
 <div id="typingPlace">
@@ -89,7 +89,7 @@
     </div>
 </div>
 
-<script type="module" src="{{ AddModifiedTime(url_for('static', filename='MainScript.js')) }}" defer></script>
-<script type="module" src="{{ AddModifiedTime(url_for('static', filename='PassageHandler.js')) }}" defer></script>
-<script type="module" src="{{ AddModifiedTime(url_for('static', filename='PassageStatistics.js')) }}" defer></script>
+<script type="module" src="{{ modified_url_for('static', filename='MainScript.js') }}" defer></script>
+<script type="module" src="{{ modified_url_for('static', filename='PassageHandler.js') }}" defer></script>
+<script type="module" src="{{ modified_url_for('static', filename='PassageStatistics.js') }}" defer></script>
 {% endblock %}
