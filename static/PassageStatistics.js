@@ -30,7 +30,7 @@ export class PassageStatistics {
                 correctWords++;
             else
                 wrongWords++;
-            var seenIndexes = new Array(wordTag.textContent.length);
+            var seenIndexes = Array(wordTag.textContent.length);
             var currentIndex = this.GetSmallestValueIndex(timePressed, seenIndexes);
             while (currentIndex != -1) {
                 var charIndex = this.GetCharIndex(wordTag.textContent[currentIndex]);
@@ -114,7 +114,7 @@ export class PassageStatistics {
         return passageResult;
     }
     GetNumberArray() {
-        var array = new Array(26);
+        var array = Array(26);
         for (var i = 0; i < array.length; i++) {
             array[i] = 0;
         }
@@ -151,10 +151,10 @@ export class PassageResult {
         this.wordSpeed = 0;
         this.wordAccuracy = 0;
         // Individual Statistics
-        this.correctChars = new Array(26);
-        this.wrongChars = new Array(26);
-        this.charSpeeds = new Array(26);
-        this.charAccuracies = new Array(26);
+        this.correctChars = Array(26);
+        this.wrongChars = Array(26);
+        this.charSpeeds = Array(26);
+        this.charAccuracies = Array(26);
     }
 }
 //# sourceMappingURL=PassageStatistics.js.map

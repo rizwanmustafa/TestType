@@ -7,7 +7,7 @@ passageHandler.GetWordsFromServer(function () {
     const typeTextBox = document.querySelector("#typeTextBox");
     var wordIndex = 0;
     var lastInput = "";
-    var timePressed = new Array(passageHandler.wordArray.length);
+    var timePressed = Array(passageHandler.wordArray.length);
     var startingTime = -1;
     ResetTimePressedArray();
     typeTextBox.addEventListener("input", OnInput);
@@ -35,7 +35,7 @@ passageHandler.GetWordsFromServer(function () {
             passageHandler.UnformatWordTag(wordIndex);
             passageHandler.FormatWordTagAsCurrent(wordIndex);
             // Remove any stored time for this word
-            timePressed[wordIndex] = new Array(passageHandler.wordArray[wordIndex].length);
+            timePressed[wordIndex] = Array(passageHandler.wordArray[wordIndex].length);
             return;
         }
         /*-------------------------------------------------------------------------------- */
@@ -84,7 +84,7 @@ passageHandler.GetWordsFromServer(function () {
     // This function resets the array values
     function ResetTimePressedArray() {
         for (let i = 0; i < passageHandler.wordArray.length; i++) {
-            timePressed[i] = new Array(passageHandler.wordArray[i].length);
+            timePressed[i] = Array(passageHandler.wordArray[i].length);
         }
     }
     // Use when the user adds a character in between the word

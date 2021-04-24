@@ -9,7 +9,7 @@ passageHandler.GetWordsFromServer(function () {
     const typeTextBox = document.querySelector("#typeTextBox") as HTMLInputElement;
     var wordIndex: number = 0;
     var lastInput: String = "";
-    var timePressed: Array<Array<number>> = new Array(passageHandler.wordArray.length);
+    var timePressed: Array<Array<number>> = Array(passageHandler.wordArray.length);
     var startingTime = -1;
     ResetTimePressedArray();
 
@@ -40,7 +40,7 @@ passageHandler.GetWordsFromServer(function () {
             passageHandler.UnformatWordTag(wordIndex);
             passageHandler.FormatWordTagAsCurrent(wordIndex);
             // Remove any stored time for this word
-            timePressed[wordIndex] = new Array<number>(passageHandler.wordArray[wordIndex].length);
+            timePressed[wordIndex] = Array<number>(passageHandler.wordArray[wordIndex].length);
             return;
         }
         /*-------------------------------------------------------------------------------- */
@@ -98,7 +98,7 @@ passageHandler.GetWordsFromServer(function () {
     // This function resets the array values
     function ResetTimePressedArray() {
         for (let i = 0; i < passageHandler.wordArray.length; i++) {
-            timePressed[i] = new Array<number>(passageHandler.wordArray[i].length);
+            timePressed[i] = Array<number>(passageHandler.wordArray[i].length);
         }
     }
 

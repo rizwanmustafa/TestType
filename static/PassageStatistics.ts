@@ -39,7 +39,7 @@ export class PassageStatistics {
             else wrongWords++;
 
 
-            var seenIndexes: Array<number> = new Array(wordTag.textContent.length);
+            var seenIndexes: Array<number> = Array(wordTag.textContent.length);
             var currentIndex = this.GetSmallestValueIndex(timePressed, seenIndexes);
 
             while (currentIndex != -1) {
@@ -73,7 +73,7 @@ export class PassageStatistics {
             const wordTag = this.wordTags[i];
             if (wordTag.classList.contains("current")) break;
 
-            if (wordTag.classList.contains("correct")) correctChars += wordTag.textContent.length +1;
+            if (wordTag.classList.contains("correct")) correctChars += wordTag.textContent.length + 1;
         }
 
         const realCorrectWords = Math.floor(correctChars / 5);
@@ -143,7 +143,7 @@ export class PassageStatistics {
     }
 
     private GetNumberArray(): Array<number> {
-        var array: Array<number> = new Array<number>(26);
+        var array: Array<number> = Array<number>(26);
 
         for (var i = 0; i < array.length; i++) {
             array[i] = 0;
@@ -187,8 +187,8 @@ export class PassageResult {
     wordAccuracy: number = 0;
 
     // Individual Statistics
-    correctChars: Array<number> = new Array<number>(26);
-    wrongChars: Array<number> = new Array<number>(26);
-    charSpeeds: Array<number> = new Array<number>(26);
-    charAccuracies: Array<number> = new Array<number>(26);
+    correctChars: Array<number> = Array<number>(26);
+    wrongChars: Array<number> = Array<number>(26);
+    charSpeeds: Array<number> = Array<number>(26);
+    charAccuracies: Array<number> = Array<number>(26);
 }
