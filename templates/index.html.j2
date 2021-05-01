@@ -46,22 +46,22 @@
         <h3>Word Statistics</h3>
         <div class="statisticDiv">
             <span class="statisticLabel">Speed (Words Per Minute): </span>
-            <span class="statistic" id="wordSpeed">43</span>
+            <span class="statistic" id="wordSpeed">00</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Accuracy: </span>
-            <span class="statistic" id="wordAccuracy">96%</span>
+            <span class="statistic" id="wordAccuracy">00%</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Correct Inputs: </span>
-            <span class="statistic" id="correctWords">48</span>
+            <span class="statistic" id="correctWords">00</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Wrong Inputs: </span>
-            <span class="statistic" id="wrongWords">2</span>
+            <span class="statistic" id="wrongWords">0</span>
         </div>
     </div>
     <div class="resultBox">
@@ -69,27 +69,25 @@
 
         <div class="statisticDiv">
             <span class="statisticLabel">Speed (Characters Per Minute): </span>
-            <span class="statistic" id="charSpeed">328</span>
+            <span class="statistic" id="charSpeed">00</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Accuracy: </span>
-            <span class="statistic" id="charAccuracy">96%</span>
+            <span class="statistic" id="charAccuracy">00%</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Correct Inputs: </span>
-            <span class="statistic" id="correctChars">48</span>
+            <span class="statistic" id="correctChars">00</span>
         </div>
 
         <div class="statisticDiv">
             <span class="statisticLabel">Wrong Inputs: </span>
-            <span class="statistic" id="wrongChars">2</span>
+            <span class="statistic" id="wrongChars">00</span>
         </div>
     </div>
 </div>
 
 <script type="module" src="{{ modified_url_for('static', filename='MainScript.js') }}" defer></script>
-<script type="module" src="{{ modified_url_for('static', filename='PassageHandler.js') }}" defer></script>
-<script type="module" src="{{ modified_url_for('static', filename='PassageStatistics.js') }}" defer></script>
 {% endblock %}

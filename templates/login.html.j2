@@ -1,12 +1,13 @@
 {% extends "base.html.j2" %}
+{% block title %}Login{% endblock %}
 {% block scripts %}
   <link rel="stylesheet" type="text/css" href="{{ modified_url_for('static', filename='form-styles.css') }}">
 {% endblock %}
 {% block content %}
 <form method="POST" action="/login">
   <h1>Login into your account</h1>
-  <input type="text" placeholder="Username" name="username">
-  <input type="password" placeholder="Password" name="password">
+  <input type="text" placeholder="Username" name="username" required>
+ <input type="password" placeholder="Password" name="password" required>
   <input type="submit" value="Login">
   <a href="/signup">Don't have an account? Click here to create one now!</a>
 </form>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session, redirect
+from flask import Flask, render_template, jsonify, request, session, redirect, flash
 from Utility import GetRandomWords, HashPassword, ValidateUserData, clamp
 from os import path
 from flask_sqlalchemy import SQLAlchemy
@@ -61,13 +61,16 @@ def SignUp():
             else:
                 if usernameExists:
                     # Do something like send a message saying the username is already taken
-                    return "Username is already taken!"
+                    flash("Username is already taken!", "error")
+                    return redirect("/signup")
                 elif emailExists:
                     # Do something like send a message saying the email is already taken
-                    return "Email is already taken!"
+                    flash("Email is already taken!", "error")
+                    return redirect("/signup")
         else:
             # Do something like flash a message saying that the input data is invalid
-            return dataValid
+            flash(dataValid, "error")
+            return redirect("/signup")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -86,7 +89,8 @@ def Login():
             foundUser: User = User.query.filter_by(username=username).first()
             if foundUser == None:
                 # Do something like send back a message saying, wrong credentials as no username found
-                return "Wrong credentials used!"
+                flash("Wrong credentials used!", "error")
+                return redirect("/login")
             inputHashPassword, saltUsed = HashPassword(
                 password, foundUser.saltUsed)
             if inputHashPassword == foundUser.hashedPassword:
@@ -94,17 +98,20 @@ def Login():
                 session['username'] = username
                 return redirect("/")
             else:
-                # Do something like flash a message saying, wrong credentials as wrong password input
-                return "Wrong credentials used!"
+                flash("Wrong credentials used!", "error")
+                return redirect("/login")
         elif username.strip() == "":
-            return "Please enter a username!"
+            flash("Please enter a username!", "error")
+            return redirect("/login")
         elif password.strip() == "":
-            return "Please enter a password!"
+            flash("Please enter a password!", "error")
+            return redirect("/login")
 
 
 @app.route("/logout")
 def Logout():
     session.pop("username", None)
+    flash("You have been logged out!", "info")
     return redirect("/login")
 
 
@@ -200,6 +207,7 @@ def GetWeakestKey(username):
         if tableName not in dbModels:
             dbModels[tableName] = GetUserResultTable(username)
             db.create_all()
+            return ""
 
         # Get all the results
         userResults = dbModels[tableName].query.all()
@@ -210,8 +218,11 @@ def GetWeakestKey(username):
         minLimit = clamp(len(userResults)-3, 0, len(userResults))
 
         def GetCharScore(charString: str):
-            charInfo = charString.split(';')
-            return int(charInfo[1]) * int(charInfo[2])
+            try:
+                charInfo = charString.split(';')
+                return int(charInfo[1]) * int(charInfo[2])
+            except:
+                return 0
 
         # Add the scores for the characters for the last 3 lessons at max
         for x in range(minLimit, len(userResults)):
