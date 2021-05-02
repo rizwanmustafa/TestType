@@ -2,8 +2,8 @@ from flask import Flask, render_template, jsonify, request, session, redirect, f
 from Utility import GetRandomWords, HashPassword, ValidateUserData, clamp
 from os import path
 from flask_sqlalchemy import SQLAlchemy
-import json
 from random import randrange
+from math import floor
 
 app = Flask(__name__)
 app.secret_key = "8MHdc9SYGEH$4l92OU*FELXrA50Fh*z%mJRTgGpHHebzc*N5UP"
@@ -13,7 +13,6 @@ app.config[
     'SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://flaskDBManager:2hhZ)&9wN{5y5Gb-@localhost/TestType'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
 dbModels: dict = {}
 
 
@@ -127,59 +126,43 @@ def IsUserAvailable(username):
 @app.route("/API/AddResult/<username>", methods=['POST'])
 def AddResult(username):
     foundUser = User.query.filter_by(username=username).first()
-    if foundUser:  # Store the result only if the user exists
+    if not foundUser:
+        # Store the result only if the user exists
+        return jsonify("User not found!")
         # Get the user result table and create all database models
-        tableName = "results" + username
-        if tableName not in dbModels:
-            dbModels[tableName] = GetUserResultTable(username)
-            db.create_all()
+    tableName = "results" + username
+    if tableName not in dbModels:
+        GetUserResultTable(username)
 
-        userResultTable = dbModels[tableName]()
-        db.create_all()
+    userResultTable = dbModels[tableName]
 
-        # Process the results
-        correctChars = request.json[0]
-        wrongChars = request.json[1]
-        charAccuracies = request.json[2]
-        charSpeeds = request.json[3]
+    # Get the data from the request
+    correctChars = request.json[0]
+    wrongChars = request.json[1]
+    charAccuracies = request.json[2]
+    charSpeeds = request.json[3]
 
-        def GetCharResult(charNum: int):
-            return str(correctChars[charNum] + wrongChars[charNum]) + ";" + str(charAccuracies[charNum]) + ";" + str(charSpeeds[charNum])
+    def AddCharResult(charNum: int):
+        # Don't add the result for the char if it was not present in the typing passage
+        if correctChars[charNum] == 0 and wrongChars[charNum] == 0:
+            return
 
-        userResultTable.A = GetCharResult(0)
-        userResultTable.B = GetCharResult(1)
-        userResultTable.C = GetCharResult(2)
-        userResultTable.D = GetCharResult(3)
-        userResultTable.E = GetCharResult(4)
-        userResultTable.F = GetCharResult(5)
-        userResultTable.G = GetCharResult(6)
-        userResultTable.H = GetCharResult(7)
-        userResultTable.I = GetCharResult(8)
-        userResultTable.J = GetCharResult(9)
-        userResultTable.K = GetCharResult(10)
-        userResultTable.L = GetCharResult(11)
-        userResultTable.M = GetCharResult(12)
-        userResultTable.N = GetCharResult(13)
-        userResultTable.O = GetCharResult(14)
-        userResultTable.P = GetCharResult(15)
-        userResultTable.Q = GetCharResult(16)
-        userResultTable.R = GetCharResult(17)
-        userResultTable.S = GetCharResult(18)
-        userResultTable.T = GetCharResult(19)
-        userResultTable.U = GetCharResult(20)
-        userResultTable.V = GetCharResult(21)
-        userResultTable.W = GetCharResult(22)
-        userResultTable.X = GetCharResult(23)
-        userResultTable.Y = GetCharResult(24)
-        userResultTable.Z = GetCharResult(25)
+        # Create an instance for char result
+        charResult = userResultTable()
+        charResult.char = chr(charNum+65)
+        charResult.speed = floor(charSpeeds[charNum])
+        charResult.accuracy = floor(charAccuracies[charNum])
+        charResult.occurrences = floor(
+            correctChars[charNum] + wrongChars[charNum])
 
-        # Add the results into the database
-        db.session.add(userResultTable)
+        # Add the char result and commit the changes
+        db.session.add(charResult)
         db.session.commit()
 
-        return jsonify("Result added!")
-    else:
-        return jsonify("Result not added!")
+    for x in range(26):
+        AddCharResult(x)
+
+    return jsonify("Result added!")
 
 
 @app.route("/API/GetPassage/<username>/<passageLength>")
@@ -189,8 +172,8 @@ def GetPersonalizedPassage(username, passageLength):
     if weakestKey == "":
         return GetWords()
     else:
-        sourceList = json.loads(WordList.query.filter_by(
-            character=weakestKey).first().wordList)
+        sourceList = WordList.query.filter_by(
+            char=weakestKey).first().wordList.split(",")
         userPassage = ""
         for x in range(passageLength):
             userPassage += sourceList[randrange(0, len(sourceList))] + " "
@@ -201,67 +184,48 @@ def GetPersonalizedPassage(username, passageLength):
 
 def GetWeakestKey(username):
     foundUser = User.query.filter_by(username=username).first()
-    if foundUser:  # Store the result only if the user exists
-        # Get table class for the specific user
-        tableName = "results" + username
-        if tableName not in dbModels:
-            dbModels[tableName] = GetUserResultTable(username)
-            db.create_all()
-            return ""
-
-        # Get all the results
-        userResults = dbModels[tableName].query.all()
-        if len(userResults) == 0:
-            return ""
-        charScores: list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        minLimit = clamp(len(userResults)-3, 0, len(userResults))
-
-        def GetCharScore(charString: str):
-            try:
-                charInfo = charString.split(';')
-                return int(charInfo[1]) * int(charInfo[2])
-            except:
-                return 0
-
-        # Add the scores for the characters for the last 3 lessons at max
-        for x in range(minLimit, len(userResults)):
-            charScores[0] += GetCharScore(userResults[x].A)
-            charScores[1] += GetCharScore(userResults[x].B)
-            charScores[2] += GetCharScore(userResults[x].C)
-            charScores[3] += GetCharScore(userResults[x].D)
-            charScores[4] += GetCharScore(userResults[x].E)
-            charScores[5] += GetCharScore(userResults[x].F)
-            charScores[6] += GetCharScore(userResults[x].G)
-            charScores[7] += GetCharScore(userResults[x].H)
-            charScores[8] += GetCharScore(userResults[x].I)
-            charScores[9] += GetCharScore(userResults[x].J)
-            charScores[10] += GetCharScore(userResults[x].K)
-            charScores[11] += GetCharScore(userResults[x].L)
-            charScores[12] += GetCharScore(userResults[x].M)
-            charScores[13] += GetCharScore(userResults[x].N)
-            charScores[14] += GetCharScore(userResults[x].O)
-            charScores[15] += GetCharScore(userResults[x].P)
-            charScores[16] += GetCharScore(userResults[x].Q)
-            charScores[17] += GetCharScore(userResults[x].R)
-            charScores[18] += GetCharScore(userResults[x].S)
-            charScores[19] += GetCharScore(userResults[x].T)
-            charScores[20] += GetCharScore(userResults[x].U)
-            charScores[21] += GetCharScore(userResults[x].V)
-            charScores[22] += GetCharScore(userResults[x].W)
-            charScores[23] += GetCharScore(userResults[x].X)
-            charScores[24] += GetCharScore(userResults[x].Y)
-            charScores[25] += GetCharScore(userResults[x].Z)
-
-        minCharIndex = 0
-        for x in range(26):
-            # Take average of the scores and find the weakest key
-            charScores[x] = int(charScores[x] / (len(userResults) - minLimit))
-            if charScores[x] < charScores[minCharIndex]:
-                minCharIndex = x
-        return chr(minCharIndex + 65)
-    else:
+    # Calculate the weakest key only if the user exists
+    if not foundUser:
         return ""
+    # Get results table databse model for the specific user
+    tableName = "results" + username
+    # If the database model for our user is not created, create it
+    if tableName not in dbModels:
+        GetUserResultTable(username)
+
+    # Get all the results
+    userResults = dbModels[tableName].query
+    if userResults.count() == 0:
+        return ""
+
+    charScores: list = []
+    minCharIndex = 0
+
+    for x in range(26):
+        # Create a new entry for the current char
+        charScores.append(0)
+        # Get the results for the current char
+        charResults = dbModels[tableName].query.filter_by(char=chr(x+65))
+
+        # Give the most priority to chars the user hasn't typed before
+        if charResults.count() == 0:
+            minCharIndex = x
+            break
+
+        # Loop through the last 3 results added and add the char scores
+        minLimit = clamp(charResults.count() - 3, 0, charResults.count())
+
+        for i in range(minLimit, charResults.count()):
+            charScores[x] += charResults[i].speed * charResults[i].accuracy
+
+        # Get the average score for the char
+        charScores[x] /= (minLimit + charResults.count())
+        charScores[x] = floor(charScores[x])
+        # If the char has the smallest score, update the data
+        if charScores[x] < charScores[minCharIndex]:
+            minCharIndex = x
+
+    return chr(minCharIndex + 65)
 
 
 def GetLoginState() -> bool:
@@ -274,42 +238,21 @@ def utility_processor():
         realFilePath = path.join(app.root_path, foldername, filename)
         modifiedTime = str(int(path.getmtime(realFilePath)))
         newFilePath = '/' + foldername + '/' + filename + '?q=' + modifiedTime
-        print(newFilePath)
         return newFilePath
     return dict(modified_url_for=modified_url_for)
 
 
 def GetUserResultTable(username):
     tabledict = {
-        'passageToken': db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True),
-        'A': db.Column(db.String(15), nullable=False),
-        'B': db.Column(db.String(15), nullable=False),
-        'C': db.Column(db.String(15), nullable=False),
-        'D': db.Column(db.String(15), nullable=False),
-        'E': db.Column(db.String(15), nullable=False),
-        'F': db.Column(db.String(15), nullable=False),
-        'G': db.Column(db.String(15), nullable=False),
-        'H': db.Column(db.String(15), nullable=False),
-        'I': db.Column(db.String(15), nullable=False),
-        'J': db.Column(db.String(15), nullable=False),
-        'K': db.Column(db.String(15), nullable=False),
-        'L': db.Column(db.String(15), nullable=False),
-        'M': db.Column(db.String(15), nullable=False),
-        'N': db.Column(db.String(15), nullable=False),
-        'O': db.Column(db.String(15), nullable=False),
-        'P': db.Column(db.String(15), nullable=False),
-        'Q': db.Column(db.String(15), nullable=False),
-        'R': db.Column(db.String(15), nullable=False),
-        'S': db.Column(db.String(15), nullable=False),
-        'T': db.Column(db.String(15), nullable=False),
-        'U': db.Column(db.String(15), nullable=False),
-        'V': db.Column(db.String(15), nullable=False),
-        'W': db.Column(db.String(15), nullable=False),
-        'X': db.Column(db.String(15), nullable=False),
-        'Y': db.Column(db.String(15), nullable=False),
-        'Z': db.Column(db.String(15), nullable=False),
+        'id': db.Column(db.Integer, primary_key=True, autoincrement=True),
+        'char': db.Column(db.String(1), nullable=False),
+        'speed': db.Column(db.Integer, nullable=False),
+        'accuracy': db.Column(db.Integer, nullable=False),
+        'occurrences': db.Column(db.Integer, nullable=False),
     }
     newclass = type("results"+username, (db.Model, ), tabledict)
+    db.create_all()
+    dbModels["results"+username] = newclass
     return newclass
 
 
@@ -329,7 +272,7 @@ class User(db.Model):
 
 class WordList(db.Model):
     __tablename__ = "WordList"
-    character = db.Column(db.String(1), nullable=False, primary_key=True)
+    char = db.Column(db.String(1), nullable=False, primary_key=True)
     wordList = db.Column(db.String(900), nullable=False)
 
 
