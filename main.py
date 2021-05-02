@@ -194,8 +194,11 @@ def GetWeakestKey(username):
         GetUserResultTable(username)
 
     # Get all the results
-    userResults = dbModels[tableName].query
-    if userResults.count() == 0:
+    try:
+        userResults = dbModels[tableName].query.all()
+    except:
+        return ""
+    if not userResults:
         return ""
 
     charScores: list = []
