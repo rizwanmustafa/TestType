@@ -3,9 +3,9 @@ export class PassageHandler {
     GetWordsFromServer(successiveFunction, username) {
         var finalURL = "";
         if (username == "")
-            finalURL = "/GetWords";
+            finalURL = "/API/GetWords";
         else
-            finalURL = "/API/GetPassage/" + username + "/50";
+            finalURL = "/API/GetWords/" + username + "/50";
         fetch(finalURL).then(response => {
             if (response.status == 200) {
                 return response.json();

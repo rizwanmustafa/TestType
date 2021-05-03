@@ -9,8 +9,8 @@ export class PassageHandler {
     // Get Words Later for more sessions without reloading webpage
     public GetWordsFromServer(successiveFunction: Function, username: string) {
         var finalURL: string = "";
-        if (username == "") finalURL = "/GetWords"
-        else finalURL = "/API/GetPassage/" + username + "/50"
+        if (username == "") finalURL = "/API/GetWords"
+        else finalURL = "/API/GetWords/" + username + "/50"
         fetch(finalURL).then(response => {
             if (response.status == 200) {
                 return response.json();

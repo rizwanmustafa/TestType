@@ -21,106 +21,29 @@ def index():
     username = session["username"] if "username" in session else ""
     return render_template("index.html.j2",  loggedIn=GetLoginState(), username=username)
 
-# Later check if the user is logged in. If yes, then send personalized words
 
-
-@app.route("/GetWords", methods=['GET'])
+@app.route("/API/GetWords", methods=['GET'])
 def GetWords():
     return jsonify(GetRandomWords(app, 50).split(" "))
 
 
-@app.route("/signup", methods=['GET', 'POST'])
-def SignUp():
-    if request.method == 'GET':
-        if GetLoginState():
-            return redirect("/")
-        else:
-            return render_template("signup.html.j2", loggedIn=GetLoginState())
-    elif request.method == 'POST':
-        # Get necessary data
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-        hashedPassword, saltUsed = HashPassword(password)
-
-        # Later send an email for verification
-        # Ensure that the user does not already exist
-        dataValid = ValidateUserData(username, email, password)
-
-        if dataValid == "":
-            usernameExists = User.query.filter_by(username=username).first()
-            emailExists = User.query.filter_by(email=email).first()
-            if usernameExists == None and emailExists == None:
-                # Add  the user in database if the data is valid
-                newuser = User(username, email, hashedPassword, saltUsed)
-                db.session.add(newuser)
-                db.session.commit()
-                session['username'] = username
-                return redirect("/")
-            else:
-                if usernameExists:
-                    # Do something like send a message saying the username is already taken
-                    flash("Username is already taken!", "error")
-                    return redirect("/signup")
-                elif emailExists:
-                    # Do something like send a message saying the email is already taken
-                    flash("Email is already taken!", "error")
-                    return redirect("/signup")
-        else:
-            # Do something like flash a message saying that the input data is invalid
-            flash(dataValid, "error")
-            return redirect("/signup")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def Login():
-    if request.method == "GET":
-        if GetLoginState():
-            return redirect("/")
-        else:
-            return render_template("login.html.j2", loggedIn=False)
-    elif request.method == "POST":
-        username: str = request.form['username']
-        password: str = request.form['password']
-
-        if username.strip() != "" and password.strip() != "":
-            # Get the user data from the database
-            foundUser: User = User.query.filter_by(username=username).first()
-            if foundUser == None:
-                # Do something like send back a message saying, wrong credentials as no username found
-                flash("Wrong credentials used!", "error")
-                return redirect("/login")
-            inputHashPassword, saltUsed = HashPassword(
-                password, foundUser.saltUsed)
-            if inputHashPassword == foundUser.hashedPassword:
-                # Do something like store the user
-                session['username'] = username
-                return redirect("/")
-            else:
-                flash("Wrong credentials used!", "error")
-                return redirect("/login")
-        elif username.strip() == "":
-            flash("Please enter a username!", "error")
-            return redirect("/login")
-        elif password.strip() == "":
-            flash("Please enter a password!", "error")
-            return redirect("/login")
-
-
-@app.route("/logout")
-def Logout():
-    session.pop("username", None)
-    flash("You have been logged out!", "info")
-    return redirect("/login")
-
-
-@app.route("/isusernameavailable/<username>")
-def IsUserAvailable(username):
-    foundUser = User.query.filter_by(username=username).first()
-    if foundUser == None:
-        return jsonify("1")
+@app.route("/API/GetWords/<username>/<passageLength>")
+def GetPersonalizedPassage(username, passageLength):
+    # Get user's weakest key if possible
+    weakestKey = GetWeakestKey(username)
+    passageLength = int(passageLength)
+    # If the user has a weak key, generate a personalized passage, else give a random passage
+    if weakestKey == "":
+        return GetWords()
     else:
-        return jsonify("0")
+        sourceList = WordList.query.filter_by(
+            char=weakestKey).first().wordList.split(",")
+        userPassage = ""
+        for x in range(passageLength):
+            userPassage += sourceList[randrange(0, len(sourceList))] + " "
+
+        userPassage = userPassage[:-1]
+        return jsonify(userPassage.split())
 
 
 @app.route("/API/AddResult/<username>", methods=['POST'])
@@ -163,23 +86,6 @@ def AddResult(username):
         AddCharResult(x)
 
     return jsonify("Result added!")
-
-
-@app.route("/API/GetPassage/<username>/<passageLength>")
-def GetPersonalizedPassage(username, passageLength):
-    weakestKey = GetWeakestKey(username)
-    passageLength = int(passageLength)
-    if weakestKey == "":
-        return GetWords()
-    else:
-        sourceList = WordList.query.filter_by(
-            char=weakestKey).first().wordList.split(",")
-        userPassage = ""
-        for x in range(passageLength):
-            userPassage += sourceList[randrange(0, len(sourceList))] + " "
-
-        userPassage = userPassage[:-1]
-        return jsonify(userPassage.split())
 
 
 def GetWeakestKey(username):
@@ -231,12 +137,100 @@ def GetWeakestKey(username):
     return chr(minCharIndex + 65)
 
 
+@app.route("/signup", methods=['GET', 'POST'])
+def SignUp():
+    if request.method == 'GET':
+        if GetLoginState():
+            return redirect("/")
+        else:
+            return render_template("signup.html.j2", loggedIn=GetLoginState())
+    elif request.method == 'POST':
+        # Get necessary data
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        hashedPassword, saltUsed = HashPassword(password)
+
+        # Later send an email for verification
+        # Ensure that the user does not already exist
+        dataValid = ValidateUserData(username, email, password)
+
+        if dataValid == "":
+            usernameExists = User.query.filter_by(username=username).first()
+            emailExists = User.query.filter_by(email=email).first()
+            if usernameExists == None and emailExists == None:
+                # Add  the user in database if the data is valid
+                newuser = User(username, email, hashedPassword, saltUsed)
+                db.session.add(newuser)
+                db.session.commit()
+                session['username'] = username
+                return redirect("/")
+            else:
+                if usernameExists:
+                    # Do something like send a message saying the username is already taken
+                    flash("Username is already taken!", "error")
+                    return redirect("/signup")
+                elif emailExists:
+                    # Do something like send a message saying the email is already taken
+                    flash("Email is already taken!", "error")
+                    return redirect("/signup")
+        else:
+            # Do something like flash a message saying that the input data is invalid
+            flash(dataValid, "error")
+            return redirect("/signup")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def Login():
+    if request.method == "GET":
+        # If the user is already logged in, redirect them to the main page
+        if GetLoginState():
+            return redirect("/")
+        else:
+            return render_template("login.html.j2", loggedIn=False)
+    elif request.method == "POST":
+        # Get the necessary data from the POST request
+        username: str = request.form['username']
+        password: str = request.form['password']
+
+        if username.strip() != "" and password.strip() != "":
+            # Get the user data from the database
+            foundUser: User = User.query.filter_by(username=username).first()
+            if foundUser == None:
+                flash("Wrong credentials used!", "error")
+                return redirect("/login")
+            inputHashPassword, saltUsed = HashPassword(
+                password, foundUser.saltUsed)
+            if inputHashPassword == foundUser.hashedPassword:
+                # Store the user
+                session['username'] = username
+                return redirect("/")
+            else:
+                flash("Wrong credentials used!", "error")
+                return redirect("/login")
+        elif username.strip() == "":
+            flash("Please enter a username!", "error")
+            return redirect("/login")
+        elif password.strip() == "":
+            flash("Please enter a password!", "error")
+            return redirect("/login")
+
+
+@app.route("/logout")
+def Logout():
+    session.pop("username", None)
+    flash("You have been logged out!", "info")
+    return redirect("/login")
+
+
 def GetLoginState() -> bool:
     return "username" in session
 
 
 @app.context_processor
 def utility_processor():
+    # This method adds the last modified time to a file path
+    # Used to prevent the browser from serving old files from its cache
     def modified_url_for(foldername, filename):
         realFilePath = path.join(app.root_path, foldername, filename)
         modifiedTime = str(int(path.getmtime(realFilePath)))
@@ -245,6 +239,7 @@ def utility_processor():
     return dict(modified_url_for=modified_url_for)
 
 
+# This method generates a database model for results for a user in runtime
 def GetUserResultTable(username):
     tabledict = {
         'id': db.Column(db.Integer, primary_key=True, autoincrement=True),
@@ -259,6 +254,7 @@ def GetUserResultTable(username):
     return newclass
 
 
+# This database model holds basic information regarding the user
 class User(db.Model):
     __tablename__ = "Users"
     username = db.Column(db.String(50), nullable=False, primary_key=True)
@@ -273,6 +269,7 @@ class User(db.Model):
         self.saltUsed = saltUsed
 
 
+# This database model holds words containing the character
 class WordList(db.Model):
     __tablename__ = "WordList"
     char = db.Column(db.String(1), nullable=False, primary_key=True)
