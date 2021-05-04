@@ -4,6 +4,7 @@ from os import path
 from flask_sqlalchemy import SQLAlchemy
 from random import randrange
 from math import floor
+from json import load
 
 app = Flask(__name__)
 app.secret_key = "8MHdc9SYGEH$4l92OU*FELXrA50Fh*z%mJRTgGpHHebzc*N5UP"
@@ -258,7 +259,7 @@ def GetUserResultTable(username):
 class User(db.Model):
     __tablename__ = "Users"
     username = db.Column(db.String(50), nullable=False, primary_key=True)
-    email = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50), nullable=False, unique=True)
     hashedPassword = db.Column(db.LargeBinary, nullable=False)
     saltUsed = db.Column(db.LargeBinary, nullable=False)
 
@@ -274,6 +275,34 @@ class WordList(db.Model):
     __tablename__ = "WordList"
     char = db.Column(db.String(1), nullable=False, primary_key=True)
     wordList = db.Column(db.String(900), nullable=False)
+
+    def __init__(self, char, wordList):
+        self.char = char
+        self.wordList = wordList
+
+
+# This method automates the process of  adding words in the database
+# This method is to be run while setting up the server to add words
+def AddWordsToDatabase():
+
+    # Get the list of the words
+    jsonFile = app.open_resource("WordList.json")
+    wordList = load(jsonFile)
+
+    # Loop through each character in the alphabet and add their words
+    for charCode in range(26):
+        char = chr(charCode + 65)
+        wordListString = ""
+        for word in wordList[charCode]:
+            wordListString += word + ","
+
+        wordListString = wordListString[:len(wordListString)-1]
+
+        dbObject = WordList(char, wordListString)
+        db.session.add(dbObject)
+
+    # Commit the changes to the database
+    db.session.commit()
 
 
 if __name__ == "__main__":
