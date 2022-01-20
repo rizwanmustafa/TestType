@@ -5,13 +5,14 @@ from flask_sqlalchemy import SQLAlchemy
 from random import randrange
 from math import floor
 from json import load
+from dotenv import dotenv_values
 
 app = Flask(__name__)
-app.secret_key = "8MHdc9SYGEH$4l92OU*FELXrA50Fh*z%mJRTgGpHHebzc*N5UP"
+ENV_CONFIG = dotenv_values()
+app.secret_key = ENV_CONFIG.get("SECRET_KEY", None)
 
 # Initiate the database connection using SQLAlchemy
-app.config[
-    'SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://flaskDBManager:2hhZ)&9wN{5y5Gb-@localhost/TestType'
+app.config['SQLALCHEMY_DATABASE_URI'] = ENV_CONFIG.get("DATABASE_URI", None)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 dbModels: dict = {}
