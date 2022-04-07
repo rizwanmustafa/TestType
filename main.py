@@ -1,3 +1,4 @@
+from sys import argv
 from flask import Flask, render_template, jsonify, request, session, redirect, flash
 from Utility import GetRandomWords, HashPassword, ValidateUserData, clamp
 from os import path
@@ -308,4 +309,12 @@ def AddWordsToDatabase():
 
 if __name__ == "__main__":
     db.create_all()
+    addWords = False
+    for i in argv:
+        if i == "--add-words":
+            addWords = True
+    if addWords: 
+        AddWordsToDatabase()
+        exit(0)
+
     app.run(debug=True)
