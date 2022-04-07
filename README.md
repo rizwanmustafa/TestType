@@ -3,7 +3,7 @@
 # Motivation
 
 The motivation for this project came from a number of typing websites including Keybr and 10FastFingers. 
-I wanted to bump my typing speed by focusing on weak characters like in Keybr but the idea of typing random words didn't resonate much with me. 
+I wanted to bump my typing speed by focusing on weak characters like in Keybr but the idea of typing combinations of random letters didn't resonate much with me. 
 So I created a small project, a hybrid between typing actual words and focusing on weak characters. The scale of this project was quite larger than the scale of my previous projects. 
 Although this project is far from ready when compared to the typing products out there, it holds a special value in my heart.
 
